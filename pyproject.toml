@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "MCP to interface with pandoc to convert files to differnt formats. Eg: Converting markdown to pdf."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [ "mcp>=1.1.0",]
+dependencies = [
+ "mcp>=1.1.0",
+ "pandoc>=2.4",
+]
 [[project.authors]]
 name = "Vivek Vellaiyappan"
 email = "vivekvellaiyappans@gmail.com"

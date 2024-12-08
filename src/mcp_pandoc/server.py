@@ -1,5 +1,5 @@
 import asyncio
-
+import pandoc
 from mcp.server.models import InitializationOptions
 import mcp.types as types
 from mcp.server import NotificationOptions, Server
@@ -111,41 +111,119 @@ async def handle_list_tools() -> list[types.Tool]:
                 },
                 "required": ["name", "content"],
             },
+        ),
+        types.Tool(
+            name="get-note",
+            description="get existing note",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                },
+                "required": ["name"],
+            },
+        ),
+        types.Tool(
+            name="convert-note-content",
+            description="convert note content from text to given output format",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "output_format": {"type": "string"},
+                },
+                "required": ["name", "output_format"],
+            },
         )
     ]
 
 @server.call_tool()
 async def handle_call_tool(
     name: str, arguments: dict | None
-) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:    
     """
     Handle tool execution requests.
     Tools can modify server state and notify clients of changes.
     """
-    if name != "add-note":
+    if name not in ["add-note", "get-note", "convert-note-content"]:
         raise ValueError(f"Unknown tool: {name}")
+    
+    # print(arguments)
 
     if not arguments:
         raise ValueError("Missing arguments")
 
-    note_name = arguments.get("name")
-    content = arguments.get("content")
 
-    if not note_name or not content:
-        raise ValueError("Missing name or content")
+    
+    if name == "add-note":
+        note_name = arguments.get("name")
+        content = arguments.get("content") 
+        
+        if not note_name or not content:
+            raise ValueError("Missing name or content")
+        
+        # Update server state
+        notes[note_name] = content
 
-    # Update server state
-    notes[note_name] = content
 
-    # Notify clients that resources have changed
-    await server.request_context.session.send_resource_list_changed()
-
-    return [
+        # Notify clients that resources have changed
+        await server.request_context.session.send_resource_list_changed()
+        
+        return [
         types.TextContent(
             type="text",
             text=f"Added note '{note_name}' with content: {content}",
         )
     ]
+    elif name == "get-note":
+        note_name = arguments.get("name")
+
+        if not note_name:
+            raise ValueError("Missing name")
+        
+        content = notes.get(note_name, None) 
+        
+        if not content:
+            raise ValueError(f'Could not get note for note name: {note_name}')
+        
+        return [
+            types.TextContent(
+                type="text",
+                text=f"Got note '{note_name}' with content: {content}",
+            )
+        ]
+    elif name == "convert-note-content":
+        note_name = arguments.get("name")
+        output_format = arguments.get("output_format")
+
+        if not (note_name or output_format):
+            raise ValueError("Missing name or Output format")
+        
+        content = notes.get(note_name, None) 
+    
+
+        # Markdown text to convert
+        markdown_text = content
+
+        # Convert Markdown to a Pandoc document
+        doc = pandoc.read(markdown_text, format="markdown")
+
+        # Convert the document to HTML and print
+        html_output = pandoc.write(doc, format=output_format)
+        print(html_output)
+
+        
+        if not html_output:
+            raise ValueError(f'Could not convert to html note: {note_name}, content: {content}')
+        
+        return [
+            types.TextContent(
+                type="text",
+                text=f"Converted contents for note: {note_name} to html: {html_output}",
+            )
+        ]
+
+
 
 async def main():
     # Run the server using stdin/stdout streams
