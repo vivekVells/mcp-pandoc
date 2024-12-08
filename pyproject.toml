@@ -9,7 +9,7 @@ dependencies = [
  "pandoc>=2.4",
 ]
 [[project.authors]]
-name = "Vivek Vellaiyappan"
+name = "Vivek Vellaiyappan Surulimuthu"
 email = "vivekvellaiyappans@gmail.com"
 
 [build-system]
