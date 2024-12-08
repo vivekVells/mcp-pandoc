@@ -1,40 +1,46 @@
-# mcp-pandoc MCP server
+# mcp-pandoc: A Document Conversion MCP Server
 
-MCP to interface with pandoc to convert files to differnt formats. Eg: Converting markdown to html.
+## Overview
 
-Converts content between different formats. Transforms input content from any supported format into the specified output format. Supported output formats include HTML, TEXT, and Markdown. Use this tool to seamlessly convert between different document and content representations while preserving formatting and structure.
+A Model Context Protocol server for document format conversion using pandoc. This server provides tools to transform content between different document formats while preserving formatting and structure.
 
-Currently supported formats: Plain, Markdown & HTML. 
-
-Future Supports (currently in development)
-
-- PDF
-
-## Components
-
-### Resources
-
-The server implements a simple note storage system with:
-- Custom note:// URI scheme for accessing individual notes
-- Each note resource has a name, description and text/plain mimetype
-
-### Prompts
-
-The server provides a single prompt:
-- summarize-notes: Creates summaries of all stored notes
-  - Optional "style" argument to control detail level (brief/detailed)
-  - Generates prompt combining all current notes with style preference
+Please note that mcp-pandoc is currently in early development. PDF support is under development, and the functionality and available tools are subject to change and expansion as we continue to improve the server.
 
 ### Tools
 
-The server implements one tool:
-- add-note: Adds a new note to the server
-  - Takes "name" and "content" as required string arguments
-  - Updates server state and notifies clients of resource changes
+1. `convert-contents`
+   - Transforms content between supported formats
+   - Inputs:
+     - `contents` (string): Source content to convert
+     - `output_format` (string): Target format (html, markdown, text)
+   - Returns: Converted content in the target format
 
-## Configuration
+### Supported Formats
 
-[TODO: Add configuration details specific to your implementation]
+Currently supported formats:
+
+- Plain text
+- Markdown
+- HTML
+
+In development:
+
+- PDF
+
+## Usage & configuration
+
+To use the published one
+
+```bash
+{
+  "mcpServers": {
+    "mcp-pandoc": {
+      "command": "uvx",
+      "args": ["mcp-pandoc"]
+    }
+  }
+}
+```
 
 ## Quickstart
 
@@ -47,7 +53,8 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
 <details>
   <summary>Development/Unpublished Servers Configuration</summary>
-  ```
+  
+  ```bash
   "mcpServers": {
     "mcp-pandoc": {
       "command": "uv",
@@ -60,11 +67,13 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
     }
   }
   ```
+  
 </details>
 
 <details>
   <summary>Published Servers Configuration</summary>
-  ```
+
+  ```bash
   "mcpServers": {
     "mcp-pandoc": {
       "command": "uvx",
@@ -74,6 +83,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
     }
   }
   ```
+
 </details>
 
 ## Development
@@ -83,11 +93,13 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 To prepare the package for distribution:
 
 1. Sync dependencies and update lockfile:
+
 ```bash
 uv sync
 ```
 
 2. Build package distributions:
+
 ```bash
 uv build
 ```
@@ -95,11 +107,13 @@ uv build
 This will create source and wheel distributions in the `dist/` directory.
 
 3. Publish to PyPI:
+
 ```bash
 uv publish
 ```
 
 Note: You'll need to set PyPI credentials via environment variables or command flags:
+
 - Token: `--token` or `UV_PUBLISH_TOKEN`
 - Or username/password: `--username`/`UV_PUBLISH_USERNAME` and `--password`/`UV_PUBLISH_PASSWORD`
 
@@ -108,12 +122,10 @@ Note: You'll need to set PyPI credentials via environment variables or command f
 Since MCP servers run over stdio, debugging can be challenging. For the best debugging
 experience, we strongly recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector).
 
-
 You can launch the MCP Inspector via [`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) with this command:
 
 ```bash
 npx @modelcontextprotocol/inspector uv --directory /Users/vivekvells/Desktop/code/ai/mcp-pandoc run mcp-pandoc
 ```
-
 
 Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
