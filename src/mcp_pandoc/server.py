@@ -6,6 +6,8 @@ from mcp.server import NotificationOptions, Server
 from pydantic import AnyUrl
 import mcp.server.stdio
 
+# TODO: REFACTOR THIS FILE TO HAVE BETTER CODE READABILITY
+
 # Store notes as a simple key-value dict to demonstrate state management
 notes: dict[str, str] = {}
 
