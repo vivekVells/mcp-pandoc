@@ -1,0 +1,17 @@
+[project]
+name = "mcp-pandoc"
+version = "0.1.0"
+description = "MCP to interface with pandoc to convert files to differnt formats. Eg: Converting markdown to pdf."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [ "mcp>=1.1.0",]
+[[project.authors]]
+name = "Vivek Vellaiyappan"
+email = "vivekvellaiyappans@gmail.com"
+
+[build-system]
+requires = [ "hatchling",]
+build-backend = "hatchling.build"
+
+[project.scripts]
+mcp-pandoc = "mcp_pandoc:main"
