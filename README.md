@@ -1,6 +1,14 @@
 # mcp-pandoc MCP server
 
-MCP to interface with pandoc to convert files to differnt formats. Eg: Converting markdown to pdf.
+MCP to interface with pandoc to convert files to differnt formats. Eg: Converting markdown to html.
+
+Converts content between different formats. Transforms input content from any supported format into the specified output format. Supported output formats include HTML, TEXT, and Markdown. Use this tool to seamlessly convert between different document and content representations while preserving formatting and structure.
+
+Currently supported formats: Plain, Markdown & HTML. 
+
+Future Supports (currently in development)
+
+- PDF
 
 ## Components
 
