@@ -6,6 +6,12 @@ A Model Context Protocol server for document format conversion using pandoc. Thi
 
 Please note that mcp-pandoc is currently in early development. PDF support is under development, and the functionality and available tools are subject to change and expansion as we continue to improve the server.
 
+## Demo
+
+![Demo showing markdown, text, and HTML conversion](demo/v1-demo-markdown-text-and-html.png)
+
+More to come...
+
 ### Tools
 
 1. `convert-contents`
