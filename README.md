@@ -31,7 +31,7 @@ Currently supported formats:
 
 In development:
 
-- PDF
+- PDF, CSV, DOCX, etc.
 
 ## Usage & configuration
 
