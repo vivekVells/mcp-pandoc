@@ -2,17 +2,30 @@
 
 ## Overview
 
-A Model Context Protocol server for document format conversion using pandoc. This server provides tools to transform content between different document formats while preserving formatting and structure.
+A Model Context Protocol server for document format conversion using [pandoc](https://pandoc.org/index.html). This server provides tools to transform content between different document formats while preserving formatting and structure.
 
 Please note that mcp-pandoc is currently in early development. PDF support is under development, and the functionality and available tools are subject to change and expansion as we continue to improve the server.
 
+Credit: This project uses the [Pandoc Python package](https://pypi.org/project/pandoc/) for document conversion, forming the foundation for this project.
+
 ## Demo
 
-![Demo showing markdown, text, and HTML conversion](demo/v1-demo-markdown-text-and-html.png)
+[![mcp-pandoc - v1: Seamless Document Format Conversion for Claude using MCP server](https://img.youtube.com/vi/vN3VOb0rygM/maxresdefault.jpg)](https://youtu.be/vN3VOb0rygM)
+
+> 🎥 [Watch on YouTube](https://youtu.be/vN3VOb0rygM)
+
+
+<details>
+<summary>Screenshots</summary>
+
+![Tool](demo/convert-contents-tool.png)
+![Demo 1 showing markdown, text, and HTML conversion](demo/v1-demo-markdown-text-and-html.png)
+![Demo 2 showing markdown, text, and HTML conversion](demo/v1-demo-md-to-html-attached.png)
+</details>
 
 More to come...
 
-### Tools
+## Tools
 
 1. `convert-contents`
    - Transforms content between supported formats
@@ -135,3 +148,14 @@ npx @modelcontextprotocol/inspector uv --directory /Users/vivekvells/Desktop/cod
 ```
 
 Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
+
+---
+
+## Contributing
+
+We welcome contributions to enhance mcp-pandoc! Here's how you can get involved:
+
+1. **Report Issues**: Found a bug or have a feature request? Open an issue on our [GitHub Issues](https://github.com/vivekVells/mcp-pandoc/issues) page.
+2. **Submit Pull Requests**: Improve the codebase or add features by creating a pull request.
+
+---
