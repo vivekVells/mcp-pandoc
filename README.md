@@ -1,5 +1,7 @@
 # mcp-pandoc: A Document Conversion MCP Server
 
+> Officially included in the [Model Context Protocol servers](https://github.com/modelcontextprotocol/servers/blob/main/README.md) open-source project. 🎉
+
 ## Overview
 
 A Model Context Protocol server for document format conversion using [pandoc](https://pandoc.org/index.html). This server provides tools to transform content between different document formats while preserving formatting and structure.
