@@ -1,4 +1,4 @@
-import pandoc
+import pypandoc
 from mcp.server.models import InitializationOptions
 import mcp.types as types
 from mcp.server import NotificationOptions, Server
@@ -16,7 +16,7 @@ async def handle_list_tools() -> list[types.Tool]:
     return [
         types.Tool(
             name="convert-contents",
-            description="Converts content between different formats. Transforms input content from any supported format into the specified output format. Supported output formats include HTML, Markdown, and PDF. Use this tool to seamlessly convert between different document and content representations while preserving formatting and structure.",
+            description="Converts content between different formats. Transforms input content from any supported format into the specified output format. Supported output formats include HTML, Markdown and Docx. Use this tool to seamlessly convert between different document and content representations while preserving formatting and structure.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -55,14 +55,16 @@ async def handle_call_tool(
         raise ValueError("Missing required parameter: 'output_format'")
     
     # Validate supported output formats
-    SUPPORTED_FORMATS = {'html', 'markdown'}
+    SUPPORTED_FORMATS = {'html', 'markdown', 'docx'}
     if output_format not in SUPPORTED_FORMATS:
         raise ValueError(f"Unsupported output format: '{output_format}'. Supported formats are: {', '.join(SUPPORTED_FORMATS)}")
     
     try:
-        # Convert content using Pandoc
-        doc = pandoc.read(contents, format="markdown")
-        converted_output = pandoc.write(doc, format=output_format)
+        # Convert content using Pandoc        
+        converted_output = pypandoc.convert_text(contents, output_format, format='markdown')
+
+        # doc = pandoc.read(contents, format="markdown")
+        # converted_output = pandoc.write(doc, format=output_format)
         notify_with_result = f'Followings are the converted contents in {output_format} format. \n Ask user if they expects to save this file. If so, they can also use "Filesystem MCP Server" \n Converted Contents: \n\n{converted_output}'
         
         if not converted_output:
