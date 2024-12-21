@@ -45,10 +45,12 @@ Currently supported formats:
 - Plain text
 - Markdown
 - HTML
+- DOCX (.docx)
+- PDF
 
 In development:
 
-- PDF, CSV, DOCX, etc.
+- CSV, etc.
 
 ## Usage & configuration
 
