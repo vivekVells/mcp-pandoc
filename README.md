@@ -3,6 +3,7 @@
 > Officially included in the [Model Context Protocol servers](https://github.com/modelcontextprotocol/servers/blob/main/README.md) open-source project. 🎉
 
 <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a>
+<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a>
 
 ## Overview
 
@@ -73,6 +74,14 @@ To use the published one
 
 On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
 On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+### Installing via Smithery
+
+To install Pandoc Document Conversion for Claude Desktop automatically via [Smithery](https://smithery.ai/server/mcp-pandoc):
+
+```bash
+npx -y @smithery/cli install mcp-pandoc --client claude
+```
 
 <details>
   <summary>Development/Unpublished Servers Configuration</summary>
