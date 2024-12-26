@@ -21,9 +21,8 @@ Credit: This project uses the [Pandoc Python package](https://pypi.org/project/p
 <details>
 <summary>Screenshots</summary>
 
-![Tool](demo/convert-contents-tool.png)
-![Demo 1 showing markdown, text, and HTML conversion](demo/v1-demo-markdown-text-and-html.png)
-![Demo 2 showing markdown, text, and HTML conversion](demo/v1-demo-md-to-html-attached.png)
+![Demo 1 DOCX conversion](demo/to_docx.png)
+![Demo 2 EPUB & HTML Conversion](demo/to_epub_and_html.png)
 </details>
 
 More to come...
