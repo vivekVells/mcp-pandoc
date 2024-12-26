@@ -18,7 +18,6 @@ Credit: This project uses the [Pandoc Python package](https://pypi.org/project/p
 
 > 🎥 [Watch on YouTube](https://youtu.be/vN3VOb0rygM)
 
-
 <details>
 <summary>Screenshots</summary>
 
@@ -68,9 +67,11 @@ To use the published one
 ### ⚠️ Important Notes
 
 #### Critical Requirements
+
 1. **PDF Conversion Prerequisites**
    - TeX Live must be installed before attempting PDF conversion
    - Installation commands:
+
      ```bash
      # Ubuntu/Debian
      sudo apt-get install texlive-xetex
