@@ -41,13 +41,27 @@ More to come...
 
 Currently supported formats:
 
-- Plain text
-- Markdown
-- HTML
+Basic formats (direct conversion):
 
-In development:
+- Plain text (.txt)
+- Markdown (.md)
+- HTML (.html)
 
-- PDF, CSV, DOCX, etc.
+Advanced formats (requires complete file paths):
+
+- PDF (.pdf) - requires TeX Live installation
+- DOCX (.docx)
+- RST (.rst)
+- LaTeX (.tex)
+- EPUB (.epub)
+
+Note: For advanced formats:
+
+1. Complete file paths with filename and extension are required
+2. **PDF conversion requires TeX Live installation** (see Critical Requirements section -> For macOS: `brew install texlive`)
+3. When no output path is specified:
+   - Basic formats: Displays converted content in the chat
+   - Advanced formats: May save in system temp directory (/tmp/ on Unix systems)
 
 ## Usage & configuration
 
