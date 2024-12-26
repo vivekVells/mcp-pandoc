@@ -65,6 +65,70 @@ To use the published one
 }
 ```
 
+### ⚠️ Important Notes
+
+#### Critical Requirements
+1. **PDF Conversion Prerequisites**
+   - TeX Live must be installed before attempting PDF conversion
+   - Installation commands:
+     ```bash
+     # Ubuntu/Debian
+     sudo apt-get install texlive-xetex
+
+     # macOS
+     brew install texlive
+
+     # Windows
+     # Install MiKTeX or TeX Live from:
+     # https://miktex.org/ or https://tug.org/texlive/
+     ```
+
+2. **File Path Requirements**
+   - When saving or converting files, you MUST provide complete file paths including filename and extension
+   - The tool does not automatically generate filenames or extensions
+
+#### Examples
+
+✅ Correct Usage:
+
+```bash
+# Converting content to PDF
+"Convert this text to PDF and save as /path/to/document.pdf"
+
+# Converting between file formats
+"Convert /path/to/input.md to PDF and save as /path/to/output.pdf"
+```
+
+❌ Incorrect Usage:
+
+```bash
+# Missing filename and extension
+"Save this as PDF in /documents/"
+
+# Missing complete path
+"Convert this to PDF"
+
+# Missing extension
+"Save as /documents/story"
+```
+
+#### Common Issues and Solutions
+
+1. **PDF Conversion Fails**
+   - Error: "xelatex not found"
+   - Solution: Install TeX Live first (see installation commands above)
+
+2. **File Conversion Fails**
+   - Error: "Invalid file path"
+   - Solution: Provide complete path including filename and extension
+   - Example: `/path/to/document.pdf` instead of just `/path/to/`
+
+3. **Format Conversion Fails**
+   - Error: "Unsupported format"
+   - Solution: Use only supported formats:
+     - Basic: txt, html, markdown
+     - Advanced: pdf, docx, rst, latex, epub
+
 ## Quickstart
 
 ### Install
