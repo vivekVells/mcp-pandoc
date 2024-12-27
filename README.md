@@ -3,6 +3,7 @@
 > Officially included in the [Model Context Protocol servers](https://github.com/modelcontextprotocol/servers/blob/main/README.md) open-source project. 🎉
 
 <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a>
+<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a>
 
 ## Overview
 
@@ -150,13 +151,15 @@ To use the published one
 
 ### Install
 
-#### Claude Desktop
+#### Option 1: Installing manually via claude_desktop_config.json config file
 
-On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+- On MacOS: `open ~/Library/Application\ Support/Claude/claude_desktop_config.json`
+- On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
 <details>
   <summary>Development/Unpublished Servers Configuration</summary>
+
+  ℹ️ Replace <DIRECTORY> with your locally cloned project path
   
   ```bash
   "mcpServers": {
@@ -164,7 +167,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/vivekvells/Desktop/code/ai/mcp-pandoc",
+        "<DIRECTORY>/mcp-pandoc",
         "run",
         "mcp-pandoc"
       ]
@@ -189,6 +192,16 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
   ```
 
 </details>
+
+#### Option 2: To install Published Servers Configuration automatically via Smithery
+
+Run the following bash command to install **published** [mcp-pandoc pypi](https://pypi.org/project/mcp-pandoc) for Claude Desktop automatically via [Smithery](https://smithery.ai/server/mcp-pandoc):
+
+```bash
+npx -y @smithery/cli install mcp-pandoc --client claude
+```
+
+**Note**: To use locally configured mcp-pandoc, follow "Development/Unpublished Servers Configuration" step above.
 
 ## Development
 
