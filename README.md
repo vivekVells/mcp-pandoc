@@ -70,21 +70,15 @@ To use the published one
 
 ### Install
 
-#### Claude Desktop
+#### Option 1: Installing manually via claude_desktop_config.json config file
 
-On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-
-### Installing via Smithery
-
-To install Pandoc Document Conversion for Claude Desktop automatically via [Smithery](https://smithery.ai/server/mcp-pandoc):
-
-```bash
-npx -y @smithery/cli install mcp-pandoc --client claude
-```
+- On MacOS: `open ~/Library/Application\ Support/Claude/claude_desktop_config.json`
+- On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
 <details>
   <summary>Development/Unpublished Servers Configuration</summary>
+
+  ℹ️ Replace <DIRECTORY> with your locally cloned project path
   
   ```bash
   "mcpServers": {
@@ -92,7 +86,7 @@ npx -y @smithery/cli install mcp-pandoc --client claude
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/vivekvells/Desktop/code/ai/mcp-pandoc",
+        "<DIRECTORY>/mcp-pandoc",
         "run",
         "mcp-pandoc"
       ]
@@ -117,6 +111,16 @@ npx -y @smithery/cli install mcp-pandoc --client claude
   ```
 
 </details>
+
+#### Option 2: To install Published Servers Configuration automatically via Smithery
+
+Run the following bash command to install **published** [mcp-pandoc pypi](https://pypi.org/project/mcp-pandoc) for Claude Desktop automatically via [Smithery](https://smithery.ai/server/mcp-pandoc):
+
+```bash
+npx -y @smithery/cli install mcp-pandoc --client claude
+```
+
+**Note**: To use locally configured mcp-pandoc, follow "Development/Unpublished Servers Configuration" step above.
 
 ## Development
 
