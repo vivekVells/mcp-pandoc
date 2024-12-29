@@ -36,9 +36,21 @@ More to come...
 1. `convert-contents`
    - Transforms content between supported formats
    - Inputs:
-     - `contents` (string): Source content to convert
-     - `output_format` (string): Target format (html, markdown, text)
-   - Returns: Converted content in the target format
+     - `contents` (string): Source content to convert (required if input_file not provided)
+     - `input_file` (string): Complete path to input file (required if contents not provided)
+     - `input_format` (string): Source format of the content (defaults to markdown)
+     - `output_format` (string): Target format (defaults to markdown)
+     - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
+   - Supported input/output formats:
+     - markdown
+     - html
+     - pdf
+     - docx
+     - rst
+     - latex
+     - epub
+     - txt
+   - Note: For advanced formats (pdf, docx, rst, latex, epub), an output_file path is required
 
 ### Supported Formats
 
