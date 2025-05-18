@@ -101,37 +101,51 @@ To use the published one
 
 #### Critical Requirements
 
-1. **UV package installation**
-   - **Required**: Install `uv` package (includes `uvx` command)
-   - Installation:
-     ```bash
-     # macOS
-     brew install uv
-     
-     # Windows/Linux
-     pip install uv
-     ```
-   - **Verify**: `uvx --version`
+1. **Pandoc Installation**
+  - **Required**: Install `pandoc` - the core document conversion engine
+  - Installation:
+    ```bash
+    # macOS
+    brew install pandoc
+    
+    # Ubuntu/Debian
+    sudo apt-get install pandoc
+    
+    # Windows
+    # Download installer from: https://pandoc.org/installing.html
+    ```
+  - **Verify**: `pandoc --version`
 
-3. **PDF Conversion Prerequisites**
-   - TeX Live must be installed before attempting PDF conversion
-   - Installation commands:
+2. **UV package installation**
+  - **Required**: Install `uv` package (includes `uvx` command)
+  - Installation:
+    ```bash
+    # macOS
+    brew install uv
+    
+    # Windows/Linux
+    pip install uv
+    ```
+  - **Verify**: `uvx --version`
 
-     ```bash
-     # Ubuntu/Debian
-     sudo apt-get install texlive-xetex
-
-     # macOS
-     brew install texlive
-
-     # Windows
-     # Install MiKTeX or TeX Live from:
-     # https://miktex.org/ or https://tug.org/texlive/
-     ```
+3. **PDF Conversion Prerequisites:** Only needed if you need to convert & save pdf
+  - TeX Live must be installed before attempting PDF conversion
+  - Installation commands:
+    ```bash
+    # Ubuntu/Debian
+    sudo apt-get install texlive-xetex
+    
+    # macOS
+    brew install texlive
+    
+    # Windows
+    # Install MiKTeX or TeX Live from:
+    # https://miktex.org/ or https://tug.org/texlive/
+    ```
 
 4. **File Path Requirements**
-   - When saving or converting files, you MUST provide complete file paths including filename and extension
-   - The tool does not automatically generate filenames or extensions
+  - When saving or converting files, you MUST provide complete file paths including filename and extension
+  - The tool does not automatically generate filenames or extensions
 
 #### Examples
 
