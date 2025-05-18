@@ -82,6 +82,8 @@ Note: For advanced formats:
 
 ## Usage & configuration
 
+**NOTE: Ensure to complete installing required packages mentioned below under "Critical Requirements".**
+
 To use the published one
 
 ```bash
@@ -99,7 +101,19 @@ To use the published one
 
 #### Critical Requirements
 
-1. **PDF Conversion Prerequisites**
+1. **UV package installation**
+   - **Required**: Install `uv` package (includes `uvx` command)
+   - Installation:
+     ```bash
+     # macOS
+     brew install uv
+     
+     # Windows/Linux
+     pip install uv
+     ```
+   - **Verify**: `uvx --version`
+
+3. **PDF Conversion Prerequisites**
    - TeX Live must be installed before attempting PDF conversion
    - Installation commands:
 
@@ -115,7 +129,7 @@ To use the published one
      # https://miktex.org/ or https://tug.org/texlive/
      ```
 
-2. **File Path Requirements**
+4. **File Path Requirements**
    - When saving or converting files, you MUST provide complete file paths including filename and extension
    - The tool does not automatically generate filenames or extensions
 
@@ -170,6 +184,7 @@ To use the published one
 - On MacOS: `open ~/Library/Application\ Support/Claude/claude_desktop_config.json`
 - On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
+a) Only for local development & contribution to this repo
 <details>
   <summary>Development/Unpublished Servers Configuration</summary>
 
@@ -191,8 +206,7 @@ To use the published one
   
 </details>
 
-<details>
-  <summary>Published Servers Configuration</summary>
+b) Published Servers Configuration - Consumers should use this config
 
   ```bash
   "mcpServers": {
@@ -205,8 +219,6 @@ To use the published one
   }
   ```
 
-</details>
-
 #### Option 2: To install Published Servers Configuration automatically via Smithery
 
 Run the following bash command to install **published** [mcp-pandoc pypi](https://pypi.org/project/mcp-pandoc) for Claude Desktop automatically via [Smithery](https://smithery.ai/server/mcp-pandoc):
@@ -214,6 +226,8 @@ Run the following bash command to install **published** [mcp-pandoc pypi](https:
 ```bash
 npx -y @smithery/cli install mcp-pandoc --client claude
 ```
+
+- If you face any issue, use the "Published Servers Configuration" above directly instead of this cli. 
 
 **Note**: To use locally configured mcp-pandoc, follow "Development/Unpublished Servers Configuration" step above.
 
