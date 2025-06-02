@@ -88,6 +88,10 @@ async def handle_list_tools() -> list[types.Tool]:
                     "output_file": {
                         "type": "string",
                         "description": "Complete path where to save the output including filename and extension (required for pdf, docx, rst, latex, epub formats)"
+                    },
+                    "reference_doc": {
+                        "type": "string",
+                        "description": "Path to a reference document to use for styling (supported for docx output format)"
                     }
                 },
                 "oneOf": [
@@ -134,10 +138,18 @@ async def handle_call_tool(
     output_file = arguments.get("output_file")
     output_format = arguments.get("output_format", "markdown").lower()
     input_format = arguments.get("input_format", "markdown").lower()
+    reference_doc = arguments.get("reference_doc")
     
     # Validate input parameters
     if not contents and not input_file:
         raise ValueError("Either 'contents' or 'input_file' must be provided")
+    
+    # Validate reference_doc if provided
+    if reference_doc:
+        if output_format != "docx":
+            raise ValueError("reference_doc parameter is only supported for docx output format")
+        if not os.path.exists(reference_doc):
+            raise ValueError(f"Reference document not found: {reference_doc}")
     
     # Define supported formats
     SUPPORTED_FORMATS = {'html', 'markdown', 'pdf', 'docx', 'rst', 'latex', 'epub', 'txt'}
@@ -158,6 +170,12 @@ async def handle_call_tool(
             extra_args.extend([
                 "--pdf-engine=xelatex",
                 "-V", "geometry:margin=1in"
+            ])
+        
+        # Handle reference doc for docx format
+        if reference_doc and output_format == "docx":
+            extra_args.extend([
+                "--reference-doc", reference_doc
             ])
         
         # Convert content using pypandoc
