@@ -43,6 +43,7 @@ More to come...
      - `input_format` (string): Source format of the content (defaults to markdown)
      - `output_format` (string): Target format (defaults to markdown)
      - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
+     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx output format)
    - Supported input/output formats:
      - markdown
      - html
@@ -157,6 +158,9 @@ To use the published one
 
 # Converting between file formats
 "Convert /path/to/input.md to PDF and save as /path/to/output.pdf"
+
+# Converting to DOCX with a reference document template
+"Convert input.md to DOCX using template.docx as reference and save as output.docx"
 ```
 
 ❌ Incorrect Usage:
