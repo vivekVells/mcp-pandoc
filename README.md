@@ -1,3 +1,4 @@
+![PyPI Downloads](https://img.shields.io/pypi/dm/mcp-pandoc)
 [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/vivekvells-mcp-pandoc-badge.png)](https://mseep.ai/app/vivekvells-mcp-pandoc)
 
 # mcp-pandoc: A Document Conversion MCP Server
