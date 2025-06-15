@@ -1,6 +1,6 @@
 [project]
 name = "mcp-pandoc"
-version = "0.3.3"
+version = "0.3.4"
 description = "MCP to interface with pandoc to convert files to differnt formats. Eg: Converting markdown to pdf."
 readme = "README.md"
 requires-python = ">=3.11"
