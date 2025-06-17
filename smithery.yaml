@@ -4,6 +4,10 @@ version: "1.0.0"
 # specify how Smithery launches the MCP server
 startCommand:
   type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    properties: {}
   # using uv run mcp-pandoc as your startup command
   commandFunction: |-
     () => ({ command: "uv", args: ["run", "mcp-pandoc"] })
