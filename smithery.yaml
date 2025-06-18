@@ -16,7 +16,7 @@ startCommand:
 dependencies:
   system:   # for system-level OS packages
     - pandoc
-    - texlive      # full TeX Live for PDF support
+    - texlive-xetex      # full TeX Live for PDF support
   python:   # pip-installable Python packages
     - uv           # the UV runner package
     - mcp-pandoc   # ensure your own package is installed in the environment
