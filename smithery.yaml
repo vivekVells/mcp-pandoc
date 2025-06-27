@@ -1,12 +1,22 @@
-# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+name: mcp-pandoc
+version: "1.0.0"
 
+# specify how Smithery launches the MCP server
 startCommand:
   type: stdio
   configSchema:
     # JSON Schema defining the configuration options for the MCP.
     type: object
     properties: {}
-  commandFunction:
-    # A function that produces the CLI command to start the MCP on stdio.
-    |-
-    () => ({command: 'uv', args: ['run', 'mcp-pandoc']})
+  # using uv run mcp-pandoc as your startup command
+  commandFunction: |-
+    () => ({ command: "uv", args: ["run", "mcp-pandoc"] })
+
+# dependencies to be installed by Smithery before running your tool
+dependencies:
+  system:   # for system-level OS packages
+    - pandoc
+    - texlive-xetex      # full TeX Live for PDF support
+  python:   # pip-installable Python packages
+    - uv           # the UV runner package
+    - mcp-pandoc   # ensure your own package is installed in the environment

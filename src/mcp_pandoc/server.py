@@ -60,6 +60,16 @@ async def handle_list_tools() -> list[types.Tool]:
                 "2. The desired output format\n"
                 "3. For advanced formats: complete output path + filename + extension\n"
                 "Example: 'Convert this markdown to PDF and save as /path/to/output.pdf'\n\n"
+                "🎨 DOCX STYLING (NEW FEATURE):\n"
+                "4. Custom DOCX Styling with Reference Documents:\n"
+                "   * Use reference_doc parameter to apply professional styling to DOCX output\n"
+                "   * Create custom templates with your branding, fonts, and formatting\n"
+                "   * Perfect for corporate reports, academic papers, and professional documents\n"
+                "   * Example: 'Convert this report to DOCX using /templates/corporate-style.docx as reference and save as /reports/Q4-report.docx'\n\n"
+                "📋 Creating Reference Documents:\n"
+                "   * Generate template: pandoc -o template.docx --print-default-data-file reference.docx\n"
+                "   * Customize in Word/LibreOffice: fonts, colors, headers, margins\n"
+                "   * Use for consistent branding across all documents\n\n"
                 "Note: After conversion, always check the success message for the exact file location."
             ),
             inputSchema={
@@ -88,6 +98,10 @@ async def handle_list_tools() -> list[types.Tool]:
                     "output_file": {
                         "type": "string",
                         "description": "Complete path where to save the output including filename and extension (required for pdf, docx, rst, latex, epub formats)"
+                    },
+                    "reference_doc": {
+                        "type": "string",
+                        "description": "Path to a reference document to use for styling (supported for docx output format)"
                     }
                 },
                 "oneOf": [
@@ -134,10 +148,18 @@ async def handle_call_tool(
     output_file = arguments.get("output_file")
     output_format = arguments.get("output_format", "markdown").lower()
     input_format = arguments.get("input_format", "markdown").lower()
+    reference_doc = arguments.get("reference_doc")
     
     # Validate input parameters
     if not contents and not input_file:
         raise ValueError("Either 'contents' or 'input_file' must be provided")
+    
+    # Validate reference_doc if provided
+    if reference_doc:
+        if output_format != "docx":
+            raise ValueError("reference_doc parameter is only supported for docx output format")
+        if not os.path.exists(reference_doc):
+            raise ValueError(f"Reference document not found: {reference_doc}")
     
     # Define supported formats
     SUPPORTED_FORMATS = {'html', 'markdown', 'pdf', 'docx', 'rst', 'latex', 'epub', 'txt'}
@@ -158,6 +180,12 @@ async def handle_call_tool(
             extra_args.extend([
                 "--pdf-engine=xelatex",
                 "-V", "geometry:margin=1in"
+            ])
+        
+        # Handle reference doc for docx format
+        if reference_doc and output_format == "docx":
+            extra_args.extend([
+                "--reference-doc", reference_doc
             ])
         
         # Convert content using pypandoc

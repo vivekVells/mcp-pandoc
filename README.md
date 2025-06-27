@@ -12,6 +12,16 @@ Please note that mcp-pandoc is currently in early development. PDF support is un
 
 Credit: This project uses the [Pandoc Python package](https://pypi.org/project/pandoc/) for document conversion, forming the foundation for this project.
 
+## 📋 Quick Reference
+
+**New to mcp-pandoc?** Check out our **[📖 CHEATSHEET.md](CHEATSHEET.md)** for:
+- ⚡ Copy-paste examples for all formats  
+- 🔄 Bidirectional conversion matrix
+- 🎯 Common workflows and pro tips
+- 🌟 Reference document styling guide
+
+*Perfect for quick lookups and getting started fast!*
+
 ## Demo
 
 [![mcp-pandoc - v1: Seamless Document Format Conversion for Claude using MCP server](https://img.youtube.com/vi/vN3VOb0rygM/maxresdefault.jpg)](https://youtu.be/vN3VOb0rygM)
@@ -40,6 +50,7 @@ More to come...
      - `input_format` (string): Source format of the content (defaults to markdown)
      - `output_format` (string): Target format (defaults to markdown)
      - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
+     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx output format)
    - Supported input/output formats:
      - markdown
      - html
@@ -51,23 +62,31 @@ More to come...
      - txt
    - Note: For advanced formats (pdf, docx, rst, latex, epub), an output_file path is required
 
-### Supported Formats
+## 📊 Supported Formats & Conversions
 
-Currently supported formats:
+### Bidirectional Conversion Matrix
+| From\To | MD | HTML | TXT | DOCX | PDF | RST | LaTeX | EPUB |
+|---------|----|----|-----|------|-----|-----|-------|------|
+| **Markdown** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **HTML** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **TXT** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **DOCX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **PDF** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **RST** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **LaTeX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **EPUB** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-Basic formats (direct conversion):
+### Format Categories
+| Category | Formats | Requirements |
+|----------|---------|--------------|
+| **Basic** | MD, HTML, TXT | None |
+| **Advanced** | DOCX, PDF, RST, LaTeX, EPUB | Must specify `output_file` path |
+| **Styled** | DOCX with reference doc | Custom template support ⭐ |
 
-- Plain text (.txt)
-- Markdown (.md)
-- HTML (.html)
-
-Advanced formats (requires complete file paths):
-
-- PDF (.pdf) - requires TeX Live installation
-- DOCX (.docx)
-- RST (.rst)
-- LaTeX (.tex)
-- EPUB (.epub)
+### Requirements by Format
+- **PDF (.pdf)** - requires TeX Live installation
+- **DOCX (.docx)** - supports custom styling via reference documents  
+- **All others** - no additional requirements
 
 Note: For advanced formats:
 
@@ -93,6 +112,8 @@ To use the published one
   }
 }
 ```
+
+**💡 Quick Start**: See **[CHEATSHEET.md](CHEATSHEET.md)** for copy-paste examples and common workflows.
 
 ### ⚠️ Important Notes
 
@@ -154,6 +175,13 @@ To use the published one
 
 # Converting between file formats
 "Convert /path/to/input.md to PDF and save as /path/to/output.pdf"
+
+# Converting to DOCX with a reference document template
+"Convert input.md to DOCX using template.docx as reference and save as output.docx"
+
+# Step-by-step reference document workflow
+"First create a reference document: pandoc -o custom-reference.docx --print-default-data-file reference.docx" or if you already have one, use that
+"Then convert with custom styling: Convert this text to DOCX using /path/to/custom-reference.docx as reference and save as /path/to/styled-output.docx"
 ```
 
 ❌ Incorrect Usage:
@@ -185,6 +213,12 @@ To use the published one
    - Solution: Use only supported formats:
      - Basic: txt, html, markdown
      - Advanced: pdf, docx, rst, latex, epub
+
+4. **Reference Document Issues**
+   - Error: "Reference document not found"
+   - Solution: Ensure the reference document path exists and is accessible
+   - Note: Reference documents only work with DOCX output format
+   - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`
 
 ## Quickstart
 
