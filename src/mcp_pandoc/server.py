@@ -60,6 +60,16 @@ async def handle_list_tools() -> list[types.Tool]:
                 "2. The desired output format\n"
                 "3. For advanced formats: complete output path + filename + extension\n"
                 "Example: 'Convert this markdown to PDF and save as /path/to/output.pdf'\n\n"
+                "🎨 DOCX STYLING (NEW FEATURE):\n"
+                "4. Custom DOCX Styling with Reference Documents:\n"
+                "   * Use reference_doc parameter to apply professional styling to DOCX output\n"
+                "   * Create custom templates with your branding, fonts, and formatting\n"
+                "   * Perfect for corporate reports, academic papers, and professional documents\n"
+                "   * Example: 'Convert this report to DOCX using /templates/corporate-style.docx as reference and save as /reports/Q4-report.docx'\n\n"
+                "📋 Creating Reference Documents:\n"
+                "   * Generate template: pandoc -o template.docx --print-default-data-file reference.docx\n"
+                "   * Customize in Word/LibreOffice: fonts, colors, headers, margins\n"
+                "   * Use for consistent branding across all documents\n\n"
                 "Note: After conversion, always check the success message for the exact file location."
             ),
             inputSchema={
