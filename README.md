@@ -71,10 +71,13 @@ More to come...
 | **HTML** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **TXT** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **DOCX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **PDF** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **RST** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **LaTeX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **EPUB** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+### A Note on PDF Support
+
+This tool uses `pandoc` for conversions, which allows for generating PDF files from the formats listed above. However, converting *from* a PDF to other formats is not supported. Therefore, PDF should be considered an **output-only** format.
 
 ### Format Categories
 | Category | Formats | Requirements |
