@@ -281,6 +281,16 @@ npx -y @smithery/cli install mcp-pandoc --client claude
 
 ## Development
 
+### Testing
+
+To run the comprehensive test suite and validate all supported bidirectional conversions, use the following command:
+
+```bash
+uv run pytest tests/test_conversions.py
+```
+
+This ensures backward compatibility and verifies the tool's core functionality.
+
 ### Building and Publishing
 
 To prepare the package for distribution:
