@@ -1,5 +1,3 @@
-
-
 import pypandoc
 import os
 import pytest
@@ -13,17 +11,19 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
 # All supported formats
-FORMATS = ['md', 'html', 'txt', 'rst', 'tex', 'docx', 'pdf', 'epub']
+FORMATS = ['md', 'html', 'txt', 'rst', 'tex', 'docx', 'pdf', 'epub', 'ipynb', 'odt']
 
 # Create a dummy fixture file for each format
 for format in FORMATS:
-    if format not in ['pdf', 'docx', 'epub']:
+    if format not in ['pdf', 'docx', 'epub', 'ipynb', 'odt']:
         with open(os.path.join(FIXTURE_DIR, f'test.{format}'), 'w') as f:
             f.write(f'# Test Document\n\nThis is a test document for pandoc conversion from {format}.\n')
 
-# Create valid docx and epub fixtures
+# Create valid docx, epub, ipynb, and odt fixtures
 pypandoc.convert_text('# Test', 'docx', format='md', outputfile=os.path.join(FIXTURE_DIR, 'test.docx'))
 pypandoc.convert_text('# Test', 'epub', format='md', outputfile=os.path.join(FIXTURE_DIR, 'test.epub'))
+pypandoc.convert_text('# Test', 'ipynb', format='md', outputfile=os.path.join(FIXTURE_DIR, 'test.ipynb'))
+pypandoc.convert_text('# Test', 'odt', format='md', outputfile=os.path.join(FIXTURE_DIR, 'test.odt'))
 
 @pytest.mark.parametrize("from_format", FORMATS)
 @pytest.mark.parametrize("to_format", FORMATS)
