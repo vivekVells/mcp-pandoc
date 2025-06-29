@@ -17,7 +17,7 @@ Credit: This project uses the [Pandoc Python package](https://pypi.org/project/p
 
 ## 📋 Quick Reference
 
-**New to mcp-pandoc?** Check out our **[📖 CHEATSHEET.md](CHEATSHEET.md)** for:
+**New to mcp-pandoc?** Check out **[📖 CHEATSHEET.md](CHEATSHEET.md)** for
 - ⚡ Copy-paste examples for all formats  
 - 🔄 Bidirectional conversion matrix
 - 🎯 Common workflows and pro tips
