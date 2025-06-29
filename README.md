@@ -60,20 +60,24 @@ More to come...
      - latex
      - epub
      - txt
+     - ipynb
+     - odt
    - Note: For advanced formats (pdf, docx, rst, latex, epub), an output_file path is required
 
 ## 📊 Supported Formats & Conversions
 
 ### Bidirectional Conversion Matrix
-| From\To | MD | HTML | TXT | DOCX | PDF | RST | LaTeX | EPUB |
-|---------|----|----|-----|------|-----|-----|-------|------|
-| **Markdown** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **HTML** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **TXT** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **DOCX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **RST** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **LaTeX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **EPUB** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| From\To | MD | HTML | TXT | DOCX | PDF | RST | LaTeX | EPUB | IPYNB | ODT |
+|---------|----|----|-----|------|-----|-----|-------|------|-------|-----|
+| **Markdown** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **HTML** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **TXT** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **DOCX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **RST** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **LaTeX** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **EPUB** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **IPYNB** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **ODT** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### A Note on PDF Support
 
@@ -82,7 +86,7 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 ### Format Categories
 | Category | Formats | Requirements |
 |----------|---------|--------------|
-| **Basic** | MD, HTML, TXT | None |
+| **Basic** | MD, HTML, TXT, IPYNB, ODT | None |
 | **Advanced** | DOCX, PDF, RST, LaTeX, EPUB | Must specify `output_file` path |
 | **Styled** | DOCX with reference doc | Custom template support ⭐ |
 

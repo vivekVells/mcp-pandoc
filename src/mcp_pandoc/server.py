@@ -41,9 +41,9 @@ async def handle_list_tools() -> list[types.Tool]:
                 "   * You can find your converted file at the specified location\n"
                 "   * If no path is specified, files may be saved in system temp directory (/tmp/ on Unix systems)\n"
                 "   * For better control, always provide explicit output file paths\n\n"
-                "Supported formats:\n"
-                "- Basic formats: txt, html, markdown\n"
-                "- Advanced formats (REQUIRE complete file paths): pdf, docx, rst, latex, epub\n\n"
+                "Supported formats:"                
+                "- Basic: txt, html, markdown, ipynb, odt"                
+                "- Advanced (REQUIRE complete file paths): pdf, docx, rst, latex, epub"
                 "✅ CORRECT Usage Examples:\n"
                 "1. 'Convert this text to HTML' (basic conversion)\n"
                 "   - Tool will show converted content\n\n"
@@ -87,13 +87,13 @@ async def handle_list_tools() -> list[types.Tool]:
                         "type": "string",
                         "description": "Source format of the content (defaults to markdown)",
                         "default": "markdown",
-                        "enum": ["markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt"]
+                        "enum": ["markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt", "ipynb", "odt"]
                     },
                     "output_format": {
                         "type": "string",
                         "description": "Desired output format (defaults to markdown)",
                         "default": "markdown",
-                        "enum": ["markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt"]
+                        "enum": ["markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt", "ipynb", "odt"]
                     },
                     "output_file": {
                         "type": "string",
@@ -162,7 +162,7 @@ async def handle_call_tool(
             raise ValueError(f"Reference document not found: {reference_doc}")
     
     # Define supported formats
-    SUPPORTED_FORMATS = {'html', 'markdown', 'pdf', 'docx', 'rst', 'latex', 'epub', 'txt'}
+    SUPPORTED_FORMATS = {'html', 'markdown', 'pdf', 'docx', 'rst', 'latex', 'epub', 'txt', 'ipynb', 'odt'}
     if output_format not in SUPPORTED_FORMATS:
         raise ValueError(f"Unsupported output format: '{output_format}'. Supported formats are: {', '.join(SUPPORTED_FORMATS)}")
     

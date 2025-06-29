@@ -14,15 +14,17 @@ _Last Updated: June 27, 2025_
 
 ### Bidirectional Conversion Matrix
 
-| From\To      | MD  | HTML | TXT | DOCX | PDF | RST | LaTeX | EPUB |
-| ------------ | --- | ---- | --- | ---- | --- | --- | ----- | ---- |
-| **Markdown** | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   |
-| **HTML**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   |
-| **TXT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   |
-| **DOCX**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   |
-| **RST**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   |
-| **LaTeX**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   |
-| **EPUB**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   |
+| From\To      | MD  | HTML | TXT | DOCX | PDF | RST | LaTeX | EPUB | IPYNB | ODT |
+| ------------ | --- | ---- | --- | ---- | --- | --- | ----- | ---- | ----- | --- |
+| **Markdown** | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **HTML**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **TXT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **DOCX**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **RST**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **LaTeX**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **EPUB**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **IPYNB**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| **ODT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
 
 ### A Note on PDF Support
 
@@ -32,7 +34,7 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 | Category     | Formats                     | Requirements                    |
 | ------------ | --------------------------- | ------------------------------- |
-| **Basic**    | MD, HTML, TXT               | None                            |
+| **Basic**    | MD, HTML, TXT, IPYNB, ODT   | None                            |
 | **Advanced** | DOCX, PDF, RST, LaTeX, EPUB | Must specify `output_file` path |
 | **Styled**   | DOCX with reference doc     | Custom template support ⭐      |
 
@@ -62,6 +64,12 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 # HTML to Markdown
 "Convert /path/input.html to Markdown and save as /path/output.md"
+
+# IPYNB to HTML
+"Convert /path/input.ipynb to HTML and save as /path/output.html"
+
+# ODT to Markdown
+"Convert /path/input.odt to Markdown and save as /path/output.md"
 ```
 
 ### Reference Document Styling (⭐ NEW Feature)
