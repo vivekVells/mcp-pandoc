@@ -1,13 +1,16 @@
 [project]
 name = "mcp-pandoc"
-version = "0.4.0"
-description = "MCP to interface with pandoc to convert files to differnt formats. Eg: Converting markdown to pdf."
+version = "0.6.0"
+description = "MCP to interface with pandoc to convert files to different formats with enhanced features like Mermaid diagram conversion and defaults file support."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
  "mcp>=1.1.0",
+ "pyyaml>=6.0.2",
  "pandoc>=2.4",
  "pypandoc>=1.14",
+ "pandocfilters>=1.5.0",
+ "panflute>=2.3.1",
 ]
 [[project.authors]]
 name = "Vivek Vellaiyappan Surulimuthu"
