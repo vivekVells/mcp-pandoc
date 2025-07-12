@@ -9,3 +9,6 @@ wheels/
 # Virtual environments
 .venv
 COMMIT_EDITMSG
+
+# AI assistant context - private development tool
+CLAUDE.md
