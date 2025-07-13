@@ -1,0 +1,11 @@
+from: markdown
+to: pdf
+pdf-engine: xelatex
+geometry:
+  - margin=1in
+fontsize: 12pt
+number-sections: true
+metadata:
+  title: "PDF with Defaults Test"
+  author: "MCP-Pandoc Test Suite"
+  date: "January 2025"

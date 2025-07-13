@@ -54,6 +54,8 @@ More to come...
      - `output_format` (string): Target format (defaults to markdown)
      - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
      - `reference_doc` (string): Path to a reference document to use for styling (supported for docx output format)
+     - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options
+     - `filters` (array): List of Pandoc filter paths to apply during conversion
    - Supported input/output formats:
      - markdown
      - html
@@ -66,6 +68,31 @@ More to come...
      - ipynb
      - odt
    - Note: For advanced formats (pdf, docx, rst, latex, epub), an output_file path is required
+
+### 🔧 Advanced Features
+
+#### Defaults Files (YAML Configuration)
+Use defaults files to create reusable conversion templates with consistent formatting:
+
+```yaml
+# academic-paper.yaml
+from: markdown
+to: pdf
+number-sections: true
+toc: true
+metadata:
+  title: "Academic Paper"
+  author: "Research Team"
+```
+
+Example usage: `"Convert paper.md to PDF using defaults academic-paper.yaml and save as paper.pdf"`
+
+#### Pandoc Filters
+Apply custom filters for enhanced processing:
+
+Example usage: `"Convert docs.md to HTML with filters ['/path/to/mermaid-filter.py'] and save as docs.html"`
+
+> 💡 **For comprehensive examples and workflows**, see **[CHEATSHEET.md](CHEATSHEET.md)**
 
 ## 📊 Supported Formats & Conversions
 

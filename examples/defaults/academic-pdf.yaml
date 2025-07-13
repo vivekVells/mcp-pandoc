@@ -1,0 +1,17 @@
+# Academic PDF defaults
+from: markdown
+to: pdf
+pdf-engine: xelatex
+number-sections: true
+toc: true
+toc-depth: 3
+geometry:
+  - margin=1in
+fontsize: 12pt
+metadata:
+  title: "Academic Paper"
+  author: "Research Team"
+  date: "2025"
+variables:
+  documentclass: article
+  fontfamily: times
