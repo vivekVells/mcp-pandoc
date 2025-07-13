@@ -1,0 +1,10 @@
+from: markdown
+to: html
+standalone: true
+metadata:
+  title: "MCP-Pandoc Defaults Test"
+  author: "Test Suite"
+  date: "2025"
+variables:
+  fontsize: "12pt"
+  geometry: "margin=1in"

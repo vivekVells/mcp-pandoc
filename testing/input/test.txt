@@ -1,0 +1,12 @@
+Plain text document for testing
+=============================
+
+This is a simple plain text document that will be used to test
+text format conversions in mcp-pandoc.
+
+Features to test:
+- Simple paragraphs
+- Line breaks
+- Basic formatting
+
+End of test document.
