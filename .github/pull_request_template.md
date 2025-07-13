@@ -1,31 +1,53 @@
 ## Summary
-<!-- Brief description of what this PR accomplishes -->
 
-## Type of Change
-- [ ] 🐛 Bug fix (fixes an issue)
-- [ ] ✨ New feature (adds functionality)
-- [ ] 📚 Documentation (updates docs only)
-- [ ] 🧪 Tests (adds or fixes tests)
-- [ ] 🔧 Maintenance (refactoring, deps, etc.)
+Brief description of what this PR changes and why.
 
 ## Essential Checklist
-- [ ] **Tests pass**: `uv run pytest tests/test_conversions.py`
-- [ ] **Documentation updated**: Added examples for new features
-- [ ] **No breaking changes**: Existing functionality preserved
-- [ ] **Manual testing**: Verified changes work as expected
+
+- [ ] Tests pass locally (`uv run pytest tests/test_conversions.py`)
+- [ ] Code follows existing patterns in `src/mcp_pandoc/server.py`
+- [ ] Documentation updated (if needed)
+- [ ] Screenshots included below for visual verification
+
+## Screenshots (Required)
+
+Please include screenshots to help reviewers verify your changes:
+
+**For new features or format support:**
+- [ ] Before/after conversion examples showing the new functionality
+- [ ] Sample input and output files
+
+**For bug fixes:**
+- [ ] Screenshots showing the error before the fix
+- [ ] Screenshots showing the fix working correctly
+
+**For all changes:**
+- [ ] Proof that existing functionality still works (test a few conversions)
+
+<!-- Upload screenshots here or link to them -->
+
+## Additional Context
+
+<details>
+<summary>🔄 Format Support Changes (expand if adding/modifying formats)</summary>
+
+- [ ] New format added to `SUPPORTED_FORMATS` in server.py
+- [ ] Bidirectional conversion testing included
+- [ ] Test fixtures added to `tests/fixtures/`
+- [ ] Conversion matrix in README.md updated
+- [ ] CHEATSHEET.md examples added
+
+</details>
+
+<details>
+<summary>⚠️ Breaking Changes (expand if applicable)</summary>
+
+- [ ] Breaking changes clearly documented
+- [ ] Migration guide provided (if needed)
+- [ ] Version bump considerations noted
+
+</details>
 
 ---
 
-## For Feature PRs (✨ New feature)
-**Please complete the [Feature PR Requirements](CONTRIBUTING.md#feature-pull-request-requirements) and confirm:**
-- [ ] Version bump follows [semantic versioning](CONTRIBUTING.md#version-updates)
-- [ ] [Documentation requirements](CONTRIBUTING.md#documentation-requirements) met
-- [ ] [Testing standards](CONTRIBUTING.md#testing-requirements) satisfied
-
-## Dependencies
-<!-- Only if adding new dependencies -->
-- **New dependencies added**: None / [List with justification]
-- **Breaking changes**: None / [Describe migration path]
-
-## Notes
-<!-- Any additional context for reviewers -->
+Any additional notes for reviewers.

@@ -1,127 +1,187 @@
 # Contributing to mcp-pandoc
 
-Welcome! We're excited you want to contribute to mcp-pandoc. Whether you're fixing a typo, reporting a bug, or adding a major feature, this guide will help you get started.
+Thank you for your interest in contributing! Choose your path below:
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Simple Changes)
 
-### For Simple Contributions
-**Bug fixes, documentation updates, small improvements:**
+**Fixing docs, typos, or small bugs?**
 
-1. **Fork & clone**: Fork the repo and clone your fork
-2. **Make changes**: Edit the files you need to change
-3. **Test**: Run `uv run pytest tests/test_conversions.py` 
-4. **Submit PR**: Create a pull request with a clear description
+1. **Fork & clone:** `git clone your-fork-url`
+2. **Make your change:** Edit the files you need
+3. **Test:** `uv run pytest tests/test_conversions.py` 
+4. **Submit PR:** Include screenshots showing it works
 
-That's it! Our PR template will guide you through the rest.
+That's it! The PR template will guide you through the rest.
 
-### Development Environment
-
-```bash
-# Core dependencies
-brew install pandoc uv                    # macOS
-sudo apt-get install pandoc && pip install uv  # Ubuntu/Debian
-
-# Clone and setup
-git clone https://github.com/vivekVells/mcp-pandoc.git
-cd mcp-pandoc
-uv sync
-
-# Verify everything works
-uv run pytest tests/test_conversions.py
-```
-
-## 📝 Contribution Types
-
-### 🐛 Bug Fixes
-- Fix the issue
-- Add a test if possible
-- Update documentation if behavior changes
-
-### 📚 Documentation 
-- Update README.md, CHEATSHEET.md, or docstrings
-- Add examples for clarity
-- Fix typos or improve explanations
-
-### 🧪 Tests
-- Add tests for uncovered functionality
-- Improve existing test coverage
-- Fix failing tests
-
-### ✨ New Features
-**For substantial new functionality, please see [Feature Requirements](#feature-pull-request-requirements) below.**
-
-## 💡 General Guidelines
-
-### Code Quality
-- **Follow existing patterns**: Look at `src/mcp_pandoc/server.py` for style guidance
-- **Add type hints**: Include type annotations for function parameters and returns
-- **Handle errors gracefully**: Provide clear, actionable error messages
-- **Test your changes**: Ensure `uv run pytest tests/test_conversions.py` passes
-
-### Security Best Practices
-- Use `yaml.safe_load()` instead of `yaml.load()`
-- Validate file paths with `os.path.exists()` before use
-- Sanitize user inputs and provide clear error messages
-
-### Performance Considerations
-- Avoid blocking operations in async functions
-- Handle large documents gracefully
-- Test with various file sizes
-
-## 🔄 Pull Request Process
-
-1. **Create a branch**: `git checkout -b feature/description` or `git checkout -b bugfix/description`
-2. **Make your changes**: Follow the guidelines above
-3. **Test thoroughly**: Run the test suite and test manually
-4. **Submit PR**: Use our PR template - it will guide you through the rest
-5. **Respond to feedback**: Work with reviewers to refine your contribution
-
-## 🐛 Bug Reports
-
-When reporting bugs, please include:
-- Clear description of the issue
-- Steps to reproduce
-- Expected vs actual behavior
-- System information (OS, Python version, Pandoc version)
-- Relevant error messages
-
-## ❓ Questions and Support
-
-- **Issues**: Use GitHub Issues for bug reports and feature requests
-- **Discussions**: Use GitHub Discussions for questions and general discussion
-- **Documentation**: Check README.md and CHEATSHEET.md first
-
-## 📋 Feature Pull Request Requirements
-
-**For substantial new features only** - simple bug fixes and documentation updates don't need this level of detail.
-
-### Version Updates
-- Follow [semantic versioning](https://semver.org/): patch for fixes, minor for features, major for breaking changes
-- Update version only in `pyproject.toml` 
-- Explain version bump reasoning in PR description
-
-### Documentation Requirements
-- **README.md**: Document new parameters in Tools section
-- **CHEATSHEET.md**: Add practical examples for new features
-- **Function docstrings**: Clear descriptions for all new functions
-
-### Testing Requirements  
-- **Comprehensive tests**: Cover new functionality and edge cases
-- **Backwards compatibility**: Ensure existing functionality remains intact
-- **Sustainable organization**: Use feature-based test file names, not PR-specific
-
-### Dependencies
-- **Justify new dependencies**: Clear explanation of necessity
-- **Security assessment**: Ensure dependencies are secure and well-maintained
-- **Version constraints**: Use appropriate pinning (e.g., `>=6.0.2`)
-
-### Code Quality
-- **Type hints**: All new functions include proper type annotations
-- **Error handling**: User-friendly error messages with actionable guidance
-- **Security**: Validate file paths, use `yaml.safe_load()`, sanitize inputs
+**Need to add features or understand the codebase?** Expand the sections below.
 
 ---
 
-## 🏆 Recognition
+<details>
+<summary>📦 Full Development Setup (expand for new features)</summary>
 
-Contributors who follow these guidelines help make mcp-pandoc better for everyone. Thank you for your contributions!
+## Prerequisites
+
+### Required Dependencies
+```bash
+# Core dependencies (required for all development)
+# macOS
+brew install pandoc uv
+
+# Ubuntu/Debian  
+sudo apt-get install pandoc
+pip install uv
+
+# Windows
+# Download pandoc from: https://pandoc.org/installing.html
+pip install uv
+```
+
+### Optional: PDF Support
+If working with PDF conversion features:
+
+```bash
+# macOS
+brew install texlive
+
+# Ubuntu/Debian
+sudo apt-get install texlive-xetex
+
+# Windows
+# Install MiKTeX or TeX Live from:
+# https://miktex.org/ or https://tug.org/texlive/
+```
+
+## Development Setup
+
+1. **Clone and setup:**
+   ```bash
+   git clone https://github.com/vivekVells/mcp-pandoc.git
+   cd mcp-pandoc
+   uv sync
+   ```
+
+2. **Test everything works:**
+   ```bash
+   uv run pytest tests/test_conversions.py
+   uv run mcp-pandoc
+   ```
+
+</details>
+
+<details>
+<summary>🏗️ Understanding the Codebase (expand to learn architecture)</summary>
+
+## Project Structure
+
+```
+/mcp-pandoc/
+├── src/mcp_pandoc/
+│   ├── __init__.py              # Entry point
+│   └── server.py                # Main MCP server implementation
+├── tests/
+│   ├── fixtures/                # Test input files for all formats
+│   ├── output/                  # Test output directory  
+│   └── test_conversions.py      # Comprehensive format testing
+├── README.md                    # User documentation
+├── CHEATSHEET.md               # Quick reference guide
+└── pyproject.toml              # Python project configuration
+```
+
+## Core Architecture
+- **MCP Server**: Implements Model Context Protocol for document conversion
+- **Primary Tool**: `convert-contents` handles all format conversions
+- **Supported Formats**: 10 formats with bidirectional conversion support
+- **Format Categories**:
+  - **Basic**: md, html, txt, ipynb, odt (can display converted content)
+  - **Advanced**: pdf, docx, rst, latex, epub (require output file paths)
+
+## Key Files
+- `src/mcp_pandoc/server.py`: Core server implementation with tool definitions
+- `tests/test_conversions.py`: Parametrized testing for all format combinations
+- `pyproject.toml`: Dependencies and build configuration
+
+</details>
+
+<details>
+<summary>⚙️ Development Guidelines (expand for code standards)</summary>
+
+## Code Quality Standards
+
+1. **Follow Existing Patterns**: 
+   - Study `src/mcp_pandoc/server.py` for coding style
+   - Use async/await patterns for MCP operations
+   - Implement comprehensive error handling
+
+2. **Type Hints**: All functions should include proper type annotations
+
+3. **Error Handling**: Provide clear, actionable error messages
+   ```python
+   # Good
+   raise ValueError(f"Output file path is required for {output_format} format")
+   
+   # Bad  
+   raise ValueError("Invalid format")
+   ```
+
+4. **JSON Schema Validation**: New parameters must include proper schema definitions
+
+## Testing Requirements
+
+1. **Run Tests**: Always run the full test suite before submitting changes
+   ```bash
+   uv run pytest tests/test_conversions.py
+   ```
+
+2. **Add Tests**: New functionality must include corresponding tests
+
+3. **Test Coverage**: The project uses parametrized testing to verify all format combinations work correctly
+
+4. **Manual Testing**: Test with MCP Inspector if making server changes:
+   ```bash
+   npx @modelcontextprotocol/inspector uv --directory $(pwd) run mcp-pandoc
+   ```
+
+## Documentation Requirements
+
+1. **Update README.md**: Document new features with clear examples
+2. **Update CHEATSHEET.md**: Add quick reference examples for new functionality  
+3. **Update Tool Descriptions**: Modify docstrings in `server.py` for parameter changes
+4. **Version Documentation**: Note any breaking changes or new requirements
+
+</details>
+
+<details>
+<summary>🔄 Format Support (expand if adding new formats)</summary>
+
+## Current Support Matrix
+- **Bidirectional**: md ↔ html ↔ txt ↔ docx ↔ rst ↔ latex ↔ epub ↔ ipynb ↔ odt
+- **Output Only**: PDF (can convert TO PDF, but not FROM PDF)
+- **Special Features**: DOCX reference document styling
+
+## Adding New Formats
+1. Update `SUPPORTED_FORMATS` in `server.py`
+2. Add to JSON Schema enum validation
+3. Create test fixtures in `tests/fixtures/`
+4. Update documentation and conversion matrix
+5. Test all bidirectional conversions
+
+</details>
+
+## Getting Help
+
+- **Issues**: Open an issue on GitHub for bugs or feature requests
+- **Discussions**: Use GitHub Discussions for questions about usage or development
+- **Testing**: Use MCP Inspector for debugging server interactions
+
+## Code of Conduct
+
+This project follows standard open source community guidelines:
+- Be respectful and inclusive
+- Focus on constructive feedback
+- Help newcomers learn and contribute
+- Maintain a professional and welcoming environment
+
+---
+
+Thank you for contributing to mcp-pandoc! Your efforts help make document conversion more accessible for everyone.
