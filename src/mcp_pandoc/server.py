@@ -140,24 +140,7 @@ async def handle_list_tools() -> list[types.Tool]:
                         "description": "Path to a Pandoc defaults file (YAML) containing conversion options. Similar to using pandoc -d option."
                     }
                 },
-                "oneOf": [
-                    {"required": ["contents"]},
-                    {"required": ["input_file"]}
-                ],
-                "allOf": [
-                    {
-                        "if": {
-                            "properties": {
-                                "output_format": {
-                                    "enum": ["pdf", "docx", "rst", "latex", "epub"]
-                                }
-                            }
-                        },
-                        "then": {
-                            "required": ["output_file"]
-                        }
-                    }
-                ]
+                "additionalProperties": false
             },
         )
     ]
@@ -460,7 +443,7 @@ async def main():
             write_stream,
             InitializationOptions(
                 server_name="mcp-pandoc",
-                server_version="0.7.0",  # Updated version with defaults file support
+                server_version="0.8.0",  # Universal MCP compatibility & SDK upgrade
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},

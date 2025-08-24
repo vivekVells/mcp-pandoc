@@ -1,11 +1,11 @@
 [project]
 name = "mcp-pandoc"
-version = "0.7.0"
+version = "0.8.0"
 description = "MCP to interface with pandoc to convert files to different formats with enhanced features like Mermaid diagram conversion and defaults file support."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
- "mcp>=1.1.0",
+ "mcp>=1.2.1",
  "pyyaml>=6.0.2",
  "pandoc>=2.4",
  "pypandoc>=1.14",
