@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Feature Request or Discussion
+    url: https://github.com/vivekVells/mcp-pandoc/discussions
+    about: For feature requests or general discussions, please use GitHub Discussions
+  - name: Documentation
+    url: https://github.com/vivekVells/mcp-pandoc/blob/main/README.md
+    about: Check the README for setup and usage instructions

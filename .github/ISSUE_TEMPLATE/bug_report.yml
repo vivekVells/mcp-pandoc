@@ -1,0 +1,97 @@
+name: Bug Report
+description: Report a problem with mcp-pandoc
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please provide the following information to help us resolve the issue quickly.
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: What were you trying to accomplish?
+      description: Describe the use case or task you were working on when the issue occurred.
+      placeholder: "I was trying to convert a Markdown file to PDF using Claude Desktop..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: "The conversion should complete successfully and create a PDF file..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include any error messages.
+      placeholder: "Got an error: Invalid request error..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Run these commands and paste the output
+      value: |
+        **Operating System:**
+        ```
+        # Run this command:
+        # macOS/Linux: uname -a
+        # Windows: systeminfo | findstr /C:"OS"
+        ```
+
+        **Python Version:**
+        ```
+        # Run: python --version
+        ```
+
+        **mcp-pandoc Version:**
+        ```
+        # Run: python -c "import mcp_pandoc; print(mcp_pandoc.__version__)"
+        # Or: pip show mcp-pandoc | grep Version
+        ```
+
+        **MCP Client:**
+        (e.g., Claude Desktop, Cursor IDE, Kiro, n8n, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide minimal steps to reproduce the issue
+      placeholder: |
+        1. Configure mcp-pandoc in Claude Desktop
+        2. Try to convert markdown to PDF
+        3. See error...
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots-logs
+    attributes:
+      label: Screenshots or Logs
+      description: If applicable, add screenshots or paste relevant logs
+      placeholder: Paste error logs or attach screenshots here
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please check these items before submitting
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have provided environment information requested above
+          required: true
