@@ -311,7 +311,7 @@ class TestVersionUpdate:
             content = f.read()
         
         # Version should be updated correctly following semantic versioning
-        assert 'version = "0.5.0"' in content
+        assert 'version = "0.7.0"' in content
         
         # New dependencies should be present
         assert 'pyyaml' in content

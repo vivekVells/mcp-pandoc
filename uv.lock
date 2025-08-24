@@ -137,7 +137,7 @@ wheels = [
 
 [[package]]
 name = "mcp-pandoc"
-version = "0.5.0"
+version = "0.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },
