@@ -1,11 +1,20 @@
+[![Downloads](https://img.shields.io/pypi/dm/mcp-pandoc.svg)](https://pypi.python.org/pypi/mcp-pandoc)
+[![CI](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml/badge.svg)](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml)
+<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a> 
+<br />
+
 ![image](https://github.com/user-attachments/assets/10f18317-58e7-430e-9aec-b706b60fe2c6)
 
 <!-- [![Downloads](https://static.pepy.tech/badge/mcp-pandoc/month)](https://pepy.tech/project/mcp-pandoc) -->
 <!-- ![PyPI - Downloads](https://img.shields.io/pypi/dm/mcp-pandoc?style=social) -->
 
+<!--
 [![Downloads](https://img.shields.io/pypi/dm/mcp-pandoc.svg)](https://pypi.python.org/pypi/mcp-pandoc)
 [![CI](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml/badge.svg)](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml)
-<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a> <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a> [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/vivekvells-mcp-pandoc-badge.png)](https://mseep.ai/app/vivekvells-mcp-pandoc)
+<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a> <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a> 
+-->
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/vivekvells-mcp-pandoc-badge.png)](https://mseep.ai/app/vivekvells-mcp-pandoc)
+<a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" />
 
 # mcp-pandoc: A Document Conversion MCP Server
 
