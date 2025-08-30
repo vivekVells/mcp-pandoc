@@ -8,7 +8,7 @@ Thank you for your interest in contributing! Choose your path below:
 
 1. **Fork & clone:** `git clone your-fork-url`
 2. **Make your change:** Edit the files you need
-3. **Test:** `uv run pytest tests/test_conversions.py` 
+3. **Test:** `uv run pytest tests/test_conversions.py`
 4. **Submit PR:** Include screenshots showing it works
 
 That's it! The PR template will guide you through the rest.
@@ -28,7 +28,7 @@ That's it! The PR template will guide you through the rest.
 # macOS
 brew install pandoc uv
 
-# Ubuntu/Debian  
+# Ubuntu/Debian
 sudo apt-get install pandoc
 pip install uv
 
@@ -81,7 +81,7 @@ sudo apt-get install texlive-xetex
 │   └── server.py                # Main MCP server implementation
 ├── tests/
 │   ├── fixtures/                # Test input files for all formats
-│   ├── output/                  # Test output directory  
+│   ├── output/                  # Test output directory
 │   └── test_conversions.py      # Comprehensive format testing
 ├── README.md                    # User documentation
 ├── CHEATSHEET.md               # Quick reference guide
@@ -108,7 +108,30 @@ sudo apt-get install texlive-xetex
 
 ## Code Quality Standards
 
-1. **Follow Existing Patterns**: 
+### Linting (Required)
+**Run before every commit - automated checks prevent regressions:**
+
+```bash
+# Python code quality (catches syntax errors like false vs False)
+uv run ruff check .
+
+# YAML file validation (CI configs, etc.)
+uv run yamllint .
+```
+
+**When to run:**
+- **Before committing**: Pre-commit hooks run these automatically
+- **After changes**: Verify your code meets standards
+- **CI will fail** if linting doesn't pass
+
+**What it catches:**
+- Syntax errors that broke production (PR #31: `false` vs `False`)
+- Code style inconsistencies
+- YAML formatting issues in configs
+
+### Code Standards
+
+1. **Follow Existing Patterns**:
    - Study `src/mcp_pandoc/server.py` for coding style
    - Use async/await patterns for MCP operations
    - Implement comprehensive error handling
@@ -119,8 +142,8 @@ sudo apt-get install texlive-xetex
    ```python
    # Good
    raise ValueError(f"Output file path is required for {output_format} format")
-   
-   # Bad  
+
+   # Bad
    raise ValueError("Invalid format")
    ```
 
@@ -145,7 +168,7 @@ sudo apt-get install texlive-xetex
 ## Documentation Requirements
 
 1. **Update README.md**: Document new features with clear examples
-2. **Update CHEATSHEET.md**: Add quick reference examples for new functionality  
+2. **Update CHEATSHEET.md**: Add quick reference examples for new functionality
 3. **Update Tool Descriptions**: Modify docstrings in `server.py` for parameter changes
 4. **Version Documentation**: Note any breaking changes or new requirements
 
