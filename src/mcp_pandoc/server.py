@@ -140,7 +140,7 @@ async def handle_list_tools() -> list[types.Tool]:
                         "description": "Path to a Pandoc defaults file (YAML) containing conversion options. Similar to using pandoc -d option."
                     }
                 },
-                "additionalProperties": false
+                "additionalProperties": False
             },
         )
     ]
