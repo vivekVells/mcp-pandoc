@@ -3,6 +3,7 @@ extends: default
 
 ignore: |
   .venv/
+  tests/
   examples/
   testing/
   smithery.yaml
