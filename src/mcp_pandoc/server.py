@@ -443,7 +443,7 @@ async def main():
             write_stream,
             InitializationOptions(
                 server_name="mcp-pandoc",
-                server_version="0.8.0",  # Universal MCP compatibility & SDK upgrade
+                server_version="0.8.1",  # Universal MCP compatibility & SDK upgrade
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},
