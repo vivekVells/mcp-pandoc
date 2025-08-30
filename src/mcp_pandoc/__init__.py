@@ -1,8 +1,11 @@
-from . import server
+"""mcp_pandoc package initialization."""
 import asyncio
 
+from . import server
+
+
 def main():
-    """Main entry point for the package."""
+    """Run the mcp-pandoc server."""
     asyncio.run(server.main())
 
 # Optionally expose other important items at package level

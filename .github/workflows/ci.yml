@@ -1,0 +1,41 @@
+---
+name: CI
+
+"on":
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install uv
+      run: pip install uv
+
+    - name: Sync dependencies (all groups)
+      run: uv sync --all-groups
+
+    - name: Run ruff (lint)
+      run: uv run ruff check .
+
+    - name: Run yamllint
+      run: uv run yamllint .
+
+    - name: Run pytest
+      run: uv run pytest
+
+    - name: Build project
+      run: uv build
+
+    - name: Test server startup
+      run: uv run python -c "import mcp_pandoc; print('✅ Server imports correctly')"

@@ -1,18 +1,18 @@
-"""
-Test suite for advanced mcp-pandoc features
+"""Test suite for advanced mcp-pandoc features
 
 This file tests enhanced functionality beyond basic conversions:
 1. Defaults file support (YAML configuration files) - Added in PR #24
-2. Enhanced filter support with path resolution - Added in PR #24  
+2. Enhanced filter support with path resolution - Added in PR #24
 3. Future advanced features will be added here
 
 Focuses on testing advanced feature functionality and integration.
 """
-import pytest
 import os
-import tempfile
-import yaml
 import sys
+import tempfile
+
+import pytest
+import yaml
 
 
 class TestDefaultsFileSupport:
@@ -21,7 +21,7 @@ class TestDefaultsFileSupport:
     def setup_method(self):
         """Setup test fixtures"""
         self.temp_dir = tempfile.mkdtemp()
-        
+
     def teardown_method(self):
         """Cleanup test fixtures"""
         import shutil
@@ -40,17 +40,17 @@ class TestDefaultsFileSupport:
                 'author': 'Test User'
             }
         }
-        
+
         defaults_path = os.path.join(self.temp_dir, "test_defaults.yaml")
         with open(defaults_path, 'w') as f:
             yaml.dump(defaults_content, f)
-        
+
         # Verify file exists and can be parsed
         assert os.path.exists(defaults_path)
-        
-        with open(defaults_path, 'r') as f:
+
+        with open(defaults_path) as f:
             loaded_content = yaml.safe_load(f)
-        
+
         assert loaded_content == defaults_content
         assert loaded_content['from'] == 'markdown'
         assert loaded_content['to'] == 'html'
@@ -61,10 +61,10 @@ class TestDefaultsFileSupport:
         malformed_path = os.path.join(self.temp_dir, "malformed.yaml")
         with open(malformed_path, 'w') as f:
             f.write("invalid: yaml: content: [unclosed")
-        
+
         # Should raise YAML error when trying to parse
         with pytest.raises(yaml.YAMLError):
-            with open(malformed_path, 'r') as f:
+            with open(malformed_path) as f:
                 yaml.safe_load(f)
 
     def test_security_safe_yaml_loading(self):
@@ -77,9 +77,9 @@ class TestDefaultsFileSupport:
         dangerous_path = os.path.join(self.temp_dir, "dangerous.yaml")
         with open(dangerous_path, 'w') as f:
             f.write(dangerous_yaml)
-        
+
         # Verify that safe_load doesn't execute dangerous content
-        with open(dangerous_path, 'r') as f:
+        with open(dangerous_path) as f:
             try:
                 result = yaml.safe_load(f)
                 # If it loads, it should be safe (no code execution)
@@ -94,17 +94,17 @@ class TestDefaultsFileSupport:
         empty_path = os.path.join(self.temp_dir, "empty.yaml")
         with open(empty_path, 'w') as f:
             f.write("")
-        
-        with open(empty_path, 'r') as f:
+
+        with open(empty_path) as f:
             result = yaml.safe_load(f)
         assert result is None
 
         # Test file with only null
-        null_path = os.path.join(self.temp_dir, "null.yaml") 
+        null_path = os.path.join(self.temp_dir, "null.yaml")
         with open(null_path, 'w') as f:
             yaml.dump(None, f)
-        
-        with open(null_path, 'r') as f:
+
+        with open(null_path) as f:
             result = yaml.safe_load(f)
         assert result is None
 
@@ -115,7 +115,7 @@ class TestFilterSupport:
     def setup_method(self):
         """Setup test fixtures"""
         self.temp_dir = tempfile.mkdtemp()
-        
+
     def teardown_method(self):
         """Cleanup test fixtures"""
         import shutil
@@ -143,12 +143,12 @@ if __name__ == "__main__":
         filter_path = os.path.join(self.temp_dir, "test_filter.py")
         with open(filter_path, 'w') as f:
             f.write(filter_content)
-        
+
         # Test permission handling
         os.chmod(filter_path, 0o644)  # Start without execute permission
         assert os.path.exists(filter_path)
         assert not os.access(filter_path, os.X_OK)
-        
+
         # Test making executable
         os.chmod(filter_path, 0o755)
         assert os.access(filter_path, os.X_OK)
@@ -160,11 +160,11 @@ if __name__ == "__main__":
         with open(abs_filter, 'w') as f:
             f.write("#!/usr/bin/env python3\n# Absolute path filter")
         os.chmod(abs_filter, 0o755)
-        
+
         assert os.path.isabs(abs_filter)
         assert os.path.exists(abs_filter)
         assert os.access(abs_filter, os.X_OK)
-        
+
         # Test relative path resolution
         current_dir = os.getcwd()
         try:
@@ -173,7 +173,7 @@ if __name__ == "__main__":
             with open(rel_filter, 'w') as f:
                 f.write("#!/usr/bin/env python3\n# Relative path filter")
             os.chmod(rel_filter, 0o755)
-            
+
             assert os.path.exists(rel_filter)
             assert os.path.exists(os.path.abspath(rel_filter))
         finally:
@@ -184,18 +184,18 @@ if __name__ == "__main__":
         # Create filters subdirectory (common pattern)
         filters_dir = os.path.join(self.temp_dir, "filters")
         os.makedirs(filters_dir)
-        
+
         # Create multiple filters
         filter_names = ["mermaid_filter.py", "citation_filter.py", "custom_filter.py"]
         filter_paths = []
-        
+
         for name in filter_names:
             filter_path = os.path.join(filters_dir, name)
             with open(filter_path, 'w') as f:
                 f.write(f"#!/usr/bin/env python3\n# {name} implementation")
             os.chmod(filter_path, 0o755)
             filter_paths.append(filter_path)
-        
+
         # Verify all filters exist and are executable
         for path in filter_paths:
             assert os.path.exists(path)
@@ -208,12 +208,12 @@ class TestNewDependencies:
     def test_yaml_dependency(self):
         """Test pyyaml dependency functionality"""
         import yaml
-        
+
         # Test basic functionality
         assert hasattr(yaml, 'safe_load')
         assert hasattr(yaml, 'dump')
         assert hasattr(yaml, 'YAMLError')
-        
+
         # Test actual usage
         test_data = {'key': 'value', 'number': 42, 'list': [1, 2, 3]}
         yaml_string = yaml.dump(test_data)
@@ -223,18 +223,18 @@ class TestNewDependencies:
     def test_pandocfilters_dependency(self):
         """Test pandocfilters dependency functionality"""
         import pandocfilters
-        
+
         # Test basic functionality
         assert hasattr(pandocfilters, 'walk')
         assert hasattr(pandocfilters, 'toJSONFilter')
-        
+
         # Test that we can import common filter functions
-        from pandocfilters import Str, Para
-        
+        from pandocfilters import Para, Str
+
         # Test basic filter element creation
         text_element = Str("test")
         para_element = Para([text_element])
-        
+
         assert text_element['t'] == 'Str'
         assert text_element['c'] == 'test'
         assert para_element['t'] == 'Para'
@@ -242,16 +242,16 @@ class TestNewDependencies:
     def test_panflute_dependency(self):
         """Test panflute dependency functionality"""
         import panflute
-        
-        # Test basic functionality  
+
+        # Test basic functionality
         assert hasattr(panflute, 'run_filter')
         assert hasattr(panflute, 'Doc')
         assert hasattr(panflute, 'Para')
-        
+
         # Test basic element creation
         doc = panflute.Doc()
         para = panflute.Para()
-        
+
         assert isinstance(doc, panflute.Doc)
         assert isinstance(para, panflute.Para)
 
@@ -269,11 +269,11 @@ class TestBackwardsCompatibility:
             "output_file": "/tmp/test.html",
             "reference_doc": "/path/to/reference.docx"
         }
-        
+
         # These should all be valid parameter names
         required_params = {"contents", "output_format", "input_format"}
         optional_params = {"output_file", "reference_doc"}
-        
+
         assert required_params.issubset(set(old_style_args.keys()))
         assert optional_params.issubset(set(old_style_args.keys()))
 
@@ -284,14 +284,14 @@ class TestBackwardsCompatibility:
             "contents": "# Test",
             "output_format": "html"
         }
-        
+
         # New parameters should be additive
         enhanced_args = {
             **minimal_args,
             "defaults_file": "/path/to/defaults.yaml",
             "filters": ["/path/to/filter.py"]
         }
-        
+
         # Both should be valid argument structures
         assert "contents" in minimal_args
         assert "output_format" in minimal_args
@@ -306,16 +306,16 @@ class TestVersionUpdate:
     def test_version_in_pyproject_toml(self):
         """Test that pyproject.toml has the correct version"""
         pyproject_path = os.path.join(os.path.dirname(__file__), '..', 'pyproject.toml')
-        
-        with open(pyproject_path, 'r') as f:
+
+        with open(pyproject_path) as f:
             content = f.read()
-        
+
         # Version should be updated correctly following semantic versioning
-        assert 'version = "0.7.0"' in content
-        
+        assert 'version = "0.8.1"' in content
+
         # New dependencies should be present
         assert 'pyyaml' in content
-        assert 'pandocfilters' in content  
+        assert 'pandocfilters' in content
         assert 'panflute' in content
 
     def test_server_module_imports(self):
@@ -324,18 +324,18 @@ class TestVersionUpdate:
         src_path = os.path.join(os.path.dirname(__file__), '..', 'src')
         if src_path not in sys.path:
             sys.path.insert(0, src_path)
-        
+
         # Import the server module
         from mcp_pandoc import server
-        
+
         # Verify core function exists
         assert hasattr(server, 'handle_call_tool')
-        
+
         # Verify we can import the new dependencies at module level
-        import yaml
         import pandocfilters
         import panflute
-        
+        import yaml
+
         # All should import successfully
         assert yaml
         assert pandocfilters
