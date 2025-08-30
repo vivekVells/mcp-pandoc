@@ -22,8 +22,8 @@ jobs:
     - name: Install uv
       run: pip install uv
 
-    - name: Install Pandoc
-      run: sudo apt-get update && sudo apt-get install -y pandoc
+    - name: Install Pandoc and TeX Live
+      run: sudo apt-get update && sudo apt-get install -y pandoc texlive-xetex
 
     - name: Sync dependencies (all groups)
       run: uv sync --all-groups
