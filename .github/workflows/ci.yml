@@ -41,4 +41,13 @@ jobs:
       run: uv build
 
     - name: Test server startup
-      run: uv run python -c "import mcp_pandoc; print('✅ Server imports correctly')"
+      run: |
+        # MCP servers are stdio-based and block waiting for JSON-RPC input
+        # A successful timeout means the server started and was running correctly
+        timeout 3 uv run mcp-pandoc >/dev/null 2>&1
+        if [ $? -eq 124 ]; then  # 124 is timeout's exit code when process is killed
+            echo "✅ MCP server starts and runs correctly"
+        else
+            echo "❌ MCP server failed to start or crashed"
+            exit 1
+        fi
