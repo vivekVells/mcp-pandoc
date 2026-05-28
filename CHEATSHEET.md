@@ -1,14 +1,16 @@
 # mcp-pandoc Quick Reference Cheatsheet
 
-_Last Updated: June 27, 2025_
+_Last Updated: May 28, 2026_
 
 ## 🚀 Prerequisites (One-Time Setup)
 
 | Component               | macOS                  | Ubuntu/Debian                        | Windows                                                               |
 | ----------------------- | ---------------------- | ------------------------------------ | --------------------------------------------------------------------- |
-| **Pandoc**              | `brew install pandoc`  | `sudo apt-get install pandoc`        | [Download installer](https://pandoc.org/installing.html)              |
-| **UV**                  | `brew install uv`      | `pip install uv`                     | `pip install uv`                                                      |
+| **Pandoc** (stdio only) | `brew install pandoc`  | `sudo apt-get install pandoc`        | [Download installer](https://pandoc.org/installing.html)              |
+| **UV** (stdio only)     | `brew install uv`      | `pip install uv`                     | `pip install uv`                                                      |
 | **TeX Live** (PDF only) | `brew install texlive` | `sudo apt-get install texlive-xetex` | [MiKTeX](https://miktex.org/) or [TeX Live](https://tug.org/texlive/) |
+
+> **Note**: HTTP mode (container deployment) includes all dependencies in the Docker image — no local installation needed.
 
 ## 📊 Supported Formats & Conversions
 
@@ -40,7 +42,9 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 ## ⚡ Quick Examples
 
-### Simple Text-to-Format Conversions
+### stdio Mode (Local Desktop)
+
+#### Simple Text-to-Format Conversions
 
 ```bash
 # Markdown to HTML (displayed)
@@ -53,7 +57,7 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 "Convert this to PDF and save as /tmp/doc.pdf: # My Document"
 ```
 
-### File-to-File Conversions
+#### File-to-File Conversions
 
 ```bash
 # DOCX to PDF
@@ -64,12 +68,71 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 # HTML to Markdown
 "Convert /path/input.html to Markdown and save as /path/output.md"
+```
 
-# IPYNB to HTML
-"Convert /path/input.ipynb to HTML and save as /path/output.html"
+### HTTP Mode (Remote/Container)
 
-# ODT to Markdown
-"Convert /path/input.odt to Markdown and save as /path/output.md"
+#### Upload → Convert → Download Workflow
+
+```bash
+# Step 1: Create upload session
+# Tool: create_upload_session(filename="report.md")
+# → Returns: { "upload_url": "https://host/upload/abc123", "uploaded_file_id": "abc123" }
+
+# Step 2: Upload file to the URL (no auth token needed)
+curl -X POST "https://host/upload/abc123" -F "file=@report.md"
+
+# Step 3: Convert with return_download_url=true
+# Tool: convert_contents(uploaded_file_id="abc123", output_format="docx", return_download_url=true)
+# → Returns: "File successfully converted. Download: https://host/download/def456"
+
+# Step 4: Download the result (no auth token needed)
+curl -o report.docx "https://host/download/def456"
+```
+
+#### Upload Reference Documents for Styling
+
+```bash
+# Step 1: Upload reference document
+# Tool: create_upload_session(filename="corporate-style.docx")
+# → Returns: { "upload_url": "https://host/upload/ref123", "uploaded_file_id": "ref123" }
+curl -X POST "https://host/upload/ref123" -F "file=@corporate-style.docx"
+
+# Step 2: Upload input file
+# Tool: create_upload_session(filename="report.md")
+# → Returns: { "upload_url": "https://host/upload/inp456", "uploaded_file_id": "inp456" }
+curl -X POST "https://host/upload/inp456" -F "file=@report.md"
+
+# Step 3: Convert with reference_doc_id
+# Tool: convert_contents(
+#   uploaded_file_id="inp456",
+#   output_format="docx",
+#   reference_doc_id="ref123",
+#   return_download_url=true
+# )
+```
+
+#### Upload Filters and Defaults Files
+
+```bash
+# Upload a Pandoc filter
+# Tool: create_upload_session(filename="mermaid-filter.py")
+# → Returns: { "upload_url": "https://host/upload/filt789", "uploaded_file_id": "filt789" }
+curl -X POST "https://host/upload/filt789" -F "file=@mermaid-filter.py"
+
+# Upload a defaults YAML file
+# Tool: create_upload_session(filename="academic.yaml")
+# → Returns: { "upload_url": "https://host/upload/def012", "uploaded_file_id": "def012" }
+curl -X POST "https://host/upload/def012" -F "file=@academic.yaml"
+
+# Convert with uploaded filter and defaults
+# Tool: convert_contents(
+#   uploaded_file_id="inp456",
+#   output_format="html",
+#   filter_ids=["filt789"],
+#   defaults_file_id="def012",
+#   return_download_url=true
+# )
 ```
 
 ### Reference Document Styling
@@ -204,15 +267,21 @@ bibliography: references.bib"
 
 | Error                                   | Solution                                    |
 | --------------------------------------- | ------------------------------------------- |
-| "xelatex not found"                     | Install TeX Live                            |
-| "Reference document not found"          | Check file path exists                      |
-| "output_file path is required"          | Add complete file path for advanced formats |
+| "xelatex not found"                     | Install TeX Live (stdio only)               |
+| "Reference document not found"          | Check file path exists (stdio) or file_id is valid (HTTP) |
+| "output_file path is required"          | Add complete file path for advanced formats (stdio) |
+| "return_download_url is required"       | Set `return_download_url=true` (HTTP)       |
 | "only supported for docx output format" | Reference docs only work with DOCX          |
-| "Defaults file not found"              | Verify YAML file path and accessibility     |
+| "Defaults file not found"              | Verify YAML file path (stdio) or file_id (HTTP) |
 | "Filter not executable"                | Check filter permissions: `chmod +x filter.py` |
 | "Invalid YAML in defaults file"        | Validate YAML syntax and structure          |
+| "Uploaded file not found: xxx"         | File ID expired or never uploaded (HTTP)    |
+| "invalid or expired file_id"           | Call `create_upload_session` first (HTTP)   |
+| Upload/download URL shows localhost    | Ensure `Host` or `X-Forwarded-Host` header is set correctly (HTTP) |
 
 ## 🎯 Parameter Quick Reference
+
+### stdio Mode Parameters
 
 | Parameter       | Type   | Required | Description                   | Example                     |
 | --------------- | ------ | -------- | ----------------------------- | --------------------------- |
@@ -225,8 +294,21 @@ bibliography: references.bib"
 | `defaults_file` | string | ❌       | Pandoc defaults YAML config   | `"/path/defaults.yaml"`     |
 | `filters`       | array  | ❌       | Pandoc filters list           | `["/path/filter.py"]`       |
 
-\*Either `contents` OR `input_file` required  
-\*\*Required for: PDF, DOCX, RST, LaTeX, EPUB
+### HTTP Mode Parameters
+
+| Parameter            | Type   | Required | Description                           | Example                     |
+| -------------------- | ------ | -------- | ------------------------------------- | --------------------------- |
+| `contents`           | string | ✅\*     | Text to convert                       | `"# Hello World"`           |
+| `uploaded_file_id`   | string | ✅\*     | File ID from `create_upload_session`  | `"abc123"`                  |
+| `output_format`      | string | ✅       | Target format                         | `"docx"`, `"pdf"`, `"html"` |
+| `return_download_url`| bool   | ⚠️\*\*   | Return full download URL              | `true`                      |
+| `input_format`       | string | ❌       | Source format (auto-detected)         | `"markdown"`                |
+| `reference_doc_id`   | string | ❌       | File ID of uploaded reference doc     | `"ref123"`                  |
+| `filter_ids`         | array  | ❌       | File IDs of uploaded filter scripts   | `["filt789"]`               |
+| `defaults_file_id`   | string | ❌       | File ID of uploaded defaults YAML     | `"def012"`                  |
+
+\*Either `contents` OR `input_file`/`uploaded_file_id` required  
+\*\*Required for: PDF, DOCX, RST, LaTeX, EPUB (stdio) or set `return_download_url=true` (HTTP)
 
 ---
 

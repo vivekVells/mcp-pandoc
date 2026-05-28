@@ -58,29 +58,37 @@ More to come...
 
 ## Tools
 
-1. `convert-contents`
-   - Transforms content between supported formats
-   - Inputs:
-     - `contents` (string): Source content to convert (required if input_file not provided)
-     - `input_file` (string): Complete path to input file (required if contents not provided)
-     - `input_format` (string): Source format of the content (defaults to markdown)
-     - `output_format` (string): Target format (defaults to markdown)
-     - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
-     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx output format)
-     - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options
-     - `filters` (array): List of Pandoc filter paths to apply during conversion
-   - Supported input/output formats:
-     - markdown
-     - html
-     - pdf
-     - docx
-     - rst
-     - latex
-     - epub
-     - txt
-     - ipynb
-     - odt
+The available tools depend on the transport mode:
+
+### stdio Mode
+
+1. **`convert_contents`** — Transforms content between supported formats
+   - `contents` (string): Source content to convert (required if input_file not provided)
+   - `input_file` (string): Complete path to input file (required if contents not provided)
+   - `input_format` (string): Source format of the content (defaults to markdown)
+   - `output_format` (string): Target format (defaults to markdown)
+   - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
+   - `reference_doc` (string): Path to a reference document to use for styling (supported for docx output format)
+   - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options
+   - `filters` (array): List of Pandoc filter paths to apply during conversion
+   - Supported input/output formats: markdown, html, pdf, docx, rst, latex, epub, txt, ipynb, odt
    - Note: For advanced formats (pdf, docx, rst, latex, epub), an output_file path is required
+
+### HTTP Mode
+
+1. **`create_upload_session`** — Creates an upload session and returns a full URL for uploading a file
+   - `filename` (string): Original filename (used to determine file extension)
+   - Returns: `{ "upload_url": "https://host/upload/FILE-ID", "uploaded_file_id": "FILE-ID" }`
+
+2. **`convert_contents`** — Transforms content between supported formats
+   - `contents` (string): Source content to convert (required if uploaded_file_id not provided)
+   - `uploaded_file_id` (string): File ID returned from `create_upload_session`
+   - `input_format` (string): Source format (defaults to markdown)
+   - `output_format` (string): Target format (defaults to markdown)
+   - `return_download_url` (boolean): When true, returns a full download URL for the converted file
+   - `reference_doc_id` (string): File ID of an uploaded reference document (for DOCX styling)
+   - `filter_ids` (array): List of file IDs for uploaded Pandoc filter scripts
+   - `defaults_file_id` (string): File ID of an uploaded Pandoc defaults YAML file
 
 ### 🔧 Advanced Features
 
@@ -139,23 +147,33 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 ### Requirements by Format
 
-- **PDF (.pdf)** - requires TeX Live installation
+- **PDF (.pdf)** - requires TeX Live installation (included in Docker image)
 - **DOCX (.docx)** - supports custom styling via reference documents
 - **All others** - no additional requirements
 
-Note: For advanced formats:
+Note for stdio mode:
 
-1. Complete file paths with filename and extension are required
-2. **PDF conversion requires TeX Live installation** (see Critical Requirements section -> For macOS: `brew install texlive`)
+1. Complete file paths with filename and extension are required for advanced formats
+2. **PDF conversion requires TeX Live installation** (see Critical Requirements section)
 3. When no output path is specified:
    - Basic formats: Displays converted content in the chat
    - Advanced formats: May save in system temp directory (/tmp/ on Unix systems)
+
+Note for HTTP mode:
+
+1. Use `uploaded_file_id` for input files instead of local paths
+2. Set `return_download_url=true` to get a download URL for the output
+3. Upload reference documents, filters, and defaults files via `create_upload_session` first, then pass their file IDs
 
 ## Usage & configuration
 
 **NOTE: Ensure to complete installing required packages mentioned below under "Critical Requirements".**
 
-To use the published one
+mcp-pandoc supports two transport modes: **stdio** (for local desktop use) and **HTTP** (for remote/container deployment).
+
+### stdio Mode (Local Desktop Use)
+
+For use with Claude Desktop or other MCP clients that connect via stdio:
 
 ```bash
 {
@@ -168,15 +186,72 @@ To use the published one
 }
 ```
 
+In stdio mode, the `convert_contents` tool accepts local file paths (`input_file`, `output_file`) and path-based arguments for `reference_doc`, `filters`, and `defaults_file`.
+
+### HTTP Mode (Remote Deployment)
+
+For deployment as a containerized service (e.g., Aliyun Function Compute), set `MCP_PANDOC_TRANSPORT=http`:
+
+```bash
+{
+  "mcpServers": {
+    "mcp-pandoc": {
+      "command": "uvx",
+      "args": ["mcp-pandoc"],
+      "env": {
+        "MCP_PANDOC_TRANSPORT": "http",
+        "MCP_PANDOC_AUTH_TOKEN": "your-secret-token",
+        "MCP_PANDOC_PORT": "8080"
+      }
+    }
+  }
+}
+```
+
+In HTTP mode, the server exposes two tools and two REST endpoints:
+
+#### MCP Tools (HTTP mode)
+
+1. **`create_upload_session`** — Creates an upload session and returns a full upload URL
+   - `filename` — Original filename (used to determine file extension)
+   - Returns: `{ "upload_url": "https://host/upload/FILE-ID", "uploaded_file_id": "FILE-ID" }`
+
+2. **`convert_contents`** — Converts content between formats
+   - `contents` — Source content (required if `uploaded_file_id` not provided)
+   - `uploaded_file_id` — File ID from `create_upload_session`
+   - `input_format` — Source format (default: markdown)
+   - `output_format` — Target format (default: markdown)
+   - `return_download_url` — When true, returns a full download URL for the result
+   - `reference_doc_id` — File ID of an uploaded reference document (for DOCX styling)
+   - `filter_ids` — List of file IDs for uploaded Pandoc filter scripts
+   - `defaults_file_id` — File ID of an uploaded Pandoc defaults YAML file
+
+#### REST Endpoints (HTTP mode)
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/upload/{file_id}` | POST | FILE-ID only | Upload file to a pre-created session |
+| `/download/{file_id}` | GET | FILE-ID only | Download a file by its ID |
+| `/mcp` | POST | Bearer token | MCP Streamable HTTP endpoint |
+
+The FILE-ID in the URL path acts as the access key — no Bearer token is needed for upload/download. Unknown file IDs return 404.
+
+#### HTTP Workflow Example
+
+1. Call `create_upload_session(filename="report.md")` → returns upload URL and file ID
+2. `POST` your file to the returned `upload_url` (multipart form, `file` field)
+3. Call `convert_contents` with `uploaded_file_id` and `return_download_url=true`
+4. `GET` the returned `download_url` to retrieve the converted file
+
 **💡 Quick Start**: See **[CHEATSHEET.md](CHEATSHEET.md)** for copy-paste examples and common workflows.
 
 ### ⚠️ Important Notes
 
 #### Critical Requirements
 
-1. **Pandoc Installation**
+1. **Pandoc Installation** (stdio mode only)
 
-- **Required**: Install `pandoc` - the core document conversion engine
+- **Required**: Install `pandoc` — the core document conversion engine
 - Installation:
 
   ```bash
@@ -192,7 +267,7 @@ To use the published one
 
 - **Verify**: `pandoc --version`
 
-2. **UV package installation**
+2. **UV package installation** (stdio mode only)
 
 - **Required**: Install `uv` package (includes `uvx` command)
 - Installation:
@@ -207,7 +282,7 @@ To use the published one
 
 - **Verify**: `uvx --version`
 
-3. **PDF Conversion Prerequisites:** Only needed if you need to convert & save pdf
+3. **PDF Conversion Prerequisites** (stdio mode only)
 
 - TeX Live must be installed before attempting PDF conversion
 - Installation commands:
@@ -224,14 +299,21 @@ To use the published one
   # https://miktex.org/ or https://tug.org/texlive/
   ```
 
-4. **File Path Requirements**
+- **CJK Support**: For proper Chinese/Japanese/Korean character rendering in PDFs, also install:
+  - Ubuntu/Debian: `sudo apt-get install texlive-lang-chinese fonts-noto-cjk`
+  - macOS: `brew install font-noto-sans-cjk font-noto-serif-cjk`
+
+> **Note**: HTTP mode (container deployment) includes all required dependencies in the Docker image — no local installation needed.
+
+4. **File Path Requirements** (stdio mode only)
 
 - When saving or converting files, you MUST provide complete file paths including filename and extension
 - The tool does not automatically generate filenames or extensions
+- **HTTP mode**: Use `uploaded_file_id` and `return_download_url` instead of file paths
 
 #### Examples
 
-✅ Correct Usage:
+✅ Correct Usage (stdio mode):
 
 ```bash
 # Converting content to PDF
@@ -248,7 +330,23 @@ To use the published one
 "Then convert with custom styling: Convert this text to DOCX using /path/to/custom-reference.docx as reference and save as /path/to/styled-output.docx"
 ```
 
-❌ Incorrect Usage:
+✅ Correct Usage (HTTP mode):
+
+```bash
+# Step 1: Call create_upload_session with filename="report.md"
+# → Returns: { "upload_url": "https://host/upload/abc123", "uploaded_file_id": "abc123" }
+
+# Step 2: POST file to upload_url
+curl -X POST "https://host/upload/abc123" -F "file=@report.md"
+
+# Step 3: Convert with return_download_url=true
+# → Returns: "File successfully converted. Download: https://host/download/def456"
+
+# Step 4: Download the result
+curl -o report.docx "https://host/download/def456"
+```
+
+❌ Incorrect Usage (stdio mode):
 
 ```bash
 # Missing filename and extension
@@ -263,12 +361,12 @@ To use the published one
 
 #### Common Issues and Solutions
 
-1. **PDF Conversion Fails**
+1. **PDF Conversion Fails** (stdio mode)
 
    - Error: "xelatex not found"
    - Solution: Install TeX Live first (see installation commands above)
 
-2. **File Conversion Fails**
+2. **File Conversion Fails** (stdio mode)
 
    - Error: "Invalid file path"
    - Solution: Provide complete path including filename and extension
@@ -281,11 +379,19 @@ To use the published one
      - Basic: txt, html, markdown
      - Advanced: pdf, docx, rst, latex, epub
 
-4. **Reference Document Issues**
+4. **Reference Document Issues** (stdio mode)
    - Error: "Reference document not found"
    - Solution: Ensure the reference document path exists and is accessible
    - Note: Reference documents only work with DOCX output format
    - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`
+
+5. **Upload/Download URL Shows localhost** (HTTP mode)
+   - Issue: The returned upload/download URLs use `localhost` instead of the actual host
+   - Solution: Ensure the `Host` header or `X-Forwarded-Host` header is correctly set by your reverse proxy/load balancer. The server extracts the base URL from the incoming request context.
+
+6. **Upload Returns 404** (HTTP mode)
+   - Issue: POST to `/upload/{file_id}` returns 404
+   - Solution: You must first call `create_upload_session` to create a valid session. The FILE-ID in the URL must match a pending session.
 
 ## Quickstart
 
@@ -354,15 +460,14 @@ npx -y @smithery/cli install mcp-pandoc --client claude
 
 ### Testing
 
-To run the comprehensive test suite and validate all supported bidirectional conversions, use the following command:
+To run the comprehensive test suite:
 
 ```bash
-uv run pytest tests/test_conversions.py
+uv run pytest tests/test_conversions.py       # Bidirectional format conversions
+uv run pytest tests/test_http_transport.py    # HTTP mode integration tests
 ```
 
-This ensures backward compatibility and verifies the tool's core functionality.
-
-### Building and Publishing
+### Building and Publishing (PyPI)
 
 To prepare the package for distribution:
 
@@ -390,6 +495,19 @@ Note: You'll need to set PyPI credentials via environment variables or command f
 
 - Token: `--token` or `UV_PUBLISH_TOKEN`
 - Or username/password: `--username`/`UV_PUBLISH_USERNAME` and `--password`/`UV_PUBLISH_PASSWORD`
+
+### Docker
+
+Build the Docker image:
+
+```bash
+docker build -t mcp-pandoc:latest .
+```
+
+The Docker image includes:
+- `pandoc` with `texlive-xetex` for PDF generation
+- `texlive-lang-chinese` and `fonts-noto-cjk` for CJK character support
+- All Python dependencies via `uv`
 
 ### Debugging
 
