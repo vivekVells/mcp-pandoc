@@ -173,6 +173,7 @@ async def handle_call_tool(
     output_file = arguments.get("output_file")
     output_format = arguments.get("output_format", "markdown").lower()
     input_format = arguments.get("input_format", "markdown").lower()
+    # The public MCP schema uses "txt"; Pandoc names the equivalent writer "plain".
     pandoc_output_format = "plain" if output_format == "txt" else output_format
     reference_doc = arguments.get("reference_doc")
     filters = arguments.get("filters", [])
@@ -461,7 +462,7 @@ async def list_tools(
     _ctx: ServerRequestContext,
     _params: types.PaginatedRequestParams | None,
 ) -> types.ListToolsResult:
-    """Adapt the existing tool catalog to the SDK v2 low-level API."""
+    """Return the existing tool catalog in the low-level server result type."""
     return types.ListToolsResult(tools=await handle_list_tools())
 
 
@@ -469,7 +470,7 @@ async def call_tool(
     _ctx: ServerRequestContext,
     params: types.CallToolRequestParams,
 ) -> types.CallToolResult:
-    """Preserve the v1 validation and model-readable error contract."""
+    """Validate tool input and return conversion errors as readable tool results."""
     try:
         if params.name == "convert-contents":
             tool = (await handle_list_tools())[0]
