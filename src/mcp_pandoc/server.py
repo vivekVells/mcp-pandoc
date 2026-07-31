@@ -469,7 +469,7 @@ async def main():
             write_stream,
             InitializationOptions(
                 server_name="mcp-pandoc",
-                server_version="0.8.1",  # Universal MCP compatibility & SDK upgrade
+                server_version="0.8.2",  # Pin SDK v1 until the v2 API migration
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},

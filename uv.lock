@@ -214,7 +214,7 @@ wheels = [
 
 [[package]]
 name = "mcp-pandoc"
-version = "0.8.1"
+version = "0.8.2"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },
@@ -237,7 +237,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mcp", specifier = ">=1.2.1" },
+    { name = "mcp", specifier = ">=1.2.1,<2" },
     { name = "pandoc", specifier = ">=2.4" },
     { name = "pandocfilters", specifier = ">=1.5.0" },
     { name = "panflute", specifier = ">=2.3.1" },
