@@ -5,13 +5,10 @@ import mcp.server.stdio
 import mcp.types as types
 import pypandoc
 import yaml
-from mcp.server import NotificationOptions, Server
-from mcp.server.models import InitializationOptions
-
-server = Server("mcp-pandoc")
+from jsonschema import ValidationError, validate
+from mcp.server import Server, ServerRequestContext
 
 
-@server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
     """List available tools.
 
@@ -96,7 +93,7 @@ async def handle_list_tools() -> list[types.Tool]:
                 "and save as /reports/report.docx'\n\n"
                 "Note: After conversion, always check the success message for the exact file location."
             ),
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "contents": {
@@ -157,7 +154,6 @@ async def handle_list_tools() -> list[types.Tool]:
         )
     ]
 
-@server.call_tool()
 async def handle_call_tool(
     name: str, arguments: dict | None
 ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
@@ -168,8 +164,6 @@ async def handle_call_tool(
     if name not in ["convert-contents"]:
         raise ValueError(f"Unknown tool: {name}")
 
-    print(arguments)
-
     if not arguments:
         raise ValueError("Missing arguments")
 
@@ -179,6 +173,8 @@ async def handle_call_tool(
     output_file = arguments.get("output_file")
     output_format = arguments.get("output_format", "markdown").lower()
     input_format = arguments.get("input_format", "markdown").lower()
+    # The public MCP schema uses "txt"; Pandoc names the equivalent writer "plain".
+    pandoc_output_format = "plain" if output_format == "txt" else output_format
     reference_doc = arguments.get("reference_doc")
     filters = arguments.get("filters", [])
     defaults_file = arguments.get("defaults_file")
@@ -370,7 +366,7 @@ async def handle_call_tool(
                 # Convert file to file
                 converted_output = pypandoc.convert_file(
                     input_file,
-                    output_format,
+                    pandoc_output_format,
                     outputfile=output_file,
                     extra_args=extra_args
                 )
@@ -382,7 +378,7 @@ async def handle_call_tool(
                 # Convert file to string
                 converted_output = pypandoc.convert_file(
                     input_file,
-                    output_format,
+                    pandoc_output_format,
                     extra_args=extra_args
                 )
         else:
@@ -392,7 +388,7 @@ async def handle_call_tool(
                 # Convert content to file
                 pypandoc.convert_text(
                     contents,
-                    output_format,
+                    pandoc_output_format,
                     format=input_format,
                     outputfile=output_file,
                     extra_args=extra_args
@@ -407,7 +403,7 @@ async def handle_call_tool(
                 # Convert content to string
                 converted_output = pypandoc.convert_text(
                     contents,
-                    output_format,
+                    pandoc_output_format,
                     format=input_format,
                     extra_args=extra_args
                 )
@@ -461,18 +457,51 @@ async def handle_call_tool(
         )
         raise ValueError(error_msg) from e
 
+
+async def list_tools(
+    _ctx: ServerRequestContext,
+    _params: types.PaginatedRequestParams | None,
+) -> types.ListToolsResult:
+    """Return the existing tool catalog in the low-level server result type."""
+    return types.ListToolsResult(tools=await handle_list_tools())
+
+
+async def call_tool(
+    _ctx: ServerRequestContext,
+    params: types.CallToolRequestParams,
+) -> types.CallToolResult:
+    """Validate tool input and return conversion errors as readable tool results."""
+    try:
+        if params.name == "convert-contents":
+            tool = (await handle_list_tools())[0]
+            validate(instance=params.arguments or {}, schema=tool.input_schema)
+
+        content = await handle_call_tool(params.name, params.arguments)
+        return types.CallToolResult(content=content)
+    except ValidationError as exc:
+        message = f"Input validation error: {exc.message}"
+    except ValueError as exc:
+        message = str(exc)
+
+    return types.CallToolResult(
+        content=[types.TextContent(type="text", text=message)],
+        is_error=True,
+    )
+
+
+server = Server(
+    "mcp-pandoc",
+    version="0.9.0",
+    on_list_tools=list_tools,
+    on_call_tool=call_tool,
+)
+
+
 async def main():
     """Run the mcp-pandoc server using stdin/stdout streams."""
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
             write_stream,
-            InitializationOptions(
-                server_name="mcp-pandoc",
-                server_version="0.8.2",  # Pin SDK v1 until the v2 API migration
-                capabilities=server.get_capabilities(
-                    notification_options=NotificationOptions(),
-                    experimental_capabilities={},
-                ),
-            ),
+            server.create_initialization_options(),
         )
