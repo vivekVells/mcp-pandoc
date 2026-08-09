@@ -8,7 +8,19 @@ import yaml
 from jsonschema import ValidationError, validate
 from mcp.server import Server, ServerRequestContext
 
-REFERENCE_DOC_FORMATS = ("docx", "odt", "pptx")
+# Output formats that accept pandoc's --reference-doc. Pandoc also accepts it for
+# pptx, but pptx is not an output format here yet; see issue #49. Add it in the same
+# change that adds pptx to the output_format enum, never before.
+REFERENCE_DOC_FORMATS = ("docx", "odt")
+
+
+def _join_with_and(values) -> str:
+    """Render a sequence as 'a', 'a and b', or 'a, b and c'."""
+    values = list(values)
+    if len(values) == 1:
+        return values[0]
+    return f"{', '.join(values[:-1])} and {values[-1]}"
+
 
 async def handle_list_tools() -> list[types.Tool]:
     """List available tools.
@@ -61,9 +73,10 @@ async def handle_list_tools() -> list[types.Tool]:
                 "2. The desired output format\n"
                 "3. For advanced formats: complete output path + filename + extension\n"
                 "Example: 'Convert this markdown to PDF and save as /path/to/output.pdf'\n\n"
-                "🎨 DOCX, ODT & PPTX STYLING (NEW FEATURE):\n"
+                "🎨 DOCX & ODT STYLING (NEW FEATURE):\n"
                 "4. Custom Styling with Reference Documents:\n"
-                "   * Use reference_doc parameter to apply professional styling to DOCX, ODT, and PPTX output\n"
+                "   * Use reference_doc parameter to apply professional styling to DOCX and ODT output\n"
+                "   * The reference document MUST match the output format: .docx for docx, .odt for odt\n"
                 "   * Create custom templates with your branding, fonts, and formatting\n"
                 "   * Perfect for corporate reports, academic papers, and professional documents\n"
                 "   * Example: 'Convert this report to DOCX using /templates/corporate-style.docx as reference "
@@ -130,8 +143,9 @@ async def handle_list_tools() -> list[types.Tool]:
                     "reference_doc": {
                         "type": "string",
                         "description": (
-                            "Path to a reference document to use for styling "
-                            "(supported for docx, odt and pptx output formats)"
+                            "Path to a reference document to use for styling. Supported for docx and "
+                            "odt output. The file must match the output format: a .docx reference for "
+                            "docx output, a .odt reference for odt output."
                         )
                     },
                     "filters": {
@@ -189,10 +203,27 @@ async def handle_call_tool(
         if output_format not in REFERENCE_DOC_FORMATS:
             raise ValueError(
                 f"reference_doc is not supported for '{output_format}' output format. "
-                f"Supported formats: {', '.join(REFERENCE_DOC_FORMATS)}"
+                f"Supported formats: {_join_with_and(REFERENCE_DOC_FORMATS)}"
             )
         if not os.path.exists(reference_doc):
             raise ValueError(f"Reference document not found: {reference_doc}")
+        if not os.path.isfile(reference_doc):
+            raise ValueError(f"Reference document is not a file: {reference_doc}")
+
+        # Pandoc does not verify that the reference document matches the writer. A
+        # mismatch is silently ignored for docx output, and produces an unreadable
+        # file for odt output. Both exit 0 with no warning, so we reject it here.
+        expected_extension = f".{output_format}"
+        actual_extension = os.path.splitext(reference_doc)[1].lower()
+        if actual_extension != expected_extension:
+            raise ValueError(
+                f"reference_doc must be a '{expected_extension}' file when output_format is "
+                f"'{output_format}', but '{os.path.basename(reference_doc)}' was given. Pandoc "
+                f"does not reject a mismatched reference document; it silently produces an "
+                f"unstyled or unreadable file. Create a matching template with: "
+                f"pandoc -o reference{expected_extension} "
+                f"--print-default-data-file reference{expected_extension}"
+            )
 
     # Validate defaults_file if provided
     if defaults_file:
@@ -352,7 +383,7 @@ async def handle_call_tool(
                 "-V", "geometry:margin=1in"
             ])
 
-        # Handle reference doc for docx, odt and pptx formats
+        # Handle reference doc for the formats pandoc accepts --reference-doc for
         if reference_doc and output_format in REFERENCE_DOC_FORMATS:
             extra_args.extend(["--reference-doc", reference_doc])
 
@@ -493,7 +524,7 @@ async def call_tool(
 
 server = Server(
     "mcp-pandoc",
-    version="0.9.0",
+    version="0.10.0",
     on_list_tools=list_tools,
     on_call_tool=call_tool,
 )

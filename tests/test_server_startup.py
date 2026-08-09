@@ -36,7 +36,7 @@ async def test_stdio_server_initializes_and_lists_tool():
             )
 
     assert initialized.server_info.name == "mcp-pandoc"
-    assert initialized.server_info.version == "0.9.0"
+    assert initialized.server_info.version == "0.10.0"
     assert [tool.name for tool in tools.tools] == ["convert-contents"]
     assert called.is_error is False
     assert '<h1 id="hello">Hello</h1>' in called.content[0].text
