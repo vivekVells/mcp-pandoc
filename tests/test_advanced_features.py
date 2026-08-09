@@ -13,7 +13,12 @@ import tempfile
 
 import pytest
 import yaml
-from mcp_pandoc.server import REFERENCE_DOC_FORMATS
+from mcp_pandoc.server import (
+    ADVANCED_FORMATS,
+    INPUT_FORMATS,
+    OUTPUT_FORMATS,
+    REFERENCE_DOC_FORMATS,
+)
 
 
 class TestDefaultsFileSupport:
@@ -452,18 +457,23 @@ class TestReferenceDocSupport:
         assert os.path.getsize(output) > 0
 
     @pytest.mark.asyncio
-    async def test_reference_doc_accepted_for_odt(self):
-        """reference_doc must be accepted end to end for odt output."""
+    @pytest.mark.parametrize("output_format", REFERENCE_DOC_FORMATS)
+    async def test_reference_doc_accepted_end_to_end(self, output_format):
+        """Every format in the allow-list must accept reference_doc through the tool itself.
+
+        Parametrized off the constant so a format added to the allow-list without working
+        end to end fails here rather than in a user's document.
+        """
         from mcp_pandoc.server import handle_call_tool
 
-        reference = self._make_reference("odt")
-        output = self._path("out.odt")
+        reference = self._make_reference(output_format)
+        output = self._path(f"out.{output_format}")
 
         await handle_call_tool(
             "convert-contents",
             {
                 "contents": "# Content",
-                "output_format": "odt",
+                "output_format": output_format,
                 "output_file": output,
                 "reference_doc": reference,
             },
@@ -511,9 +521,11 @@ class TestReferenceDocSupport:
                 {"contents": "# Test", "output_format": "html", "reference_doc": reference},
             )
 
+        from mcp_pandoc.server import _join_with_and
+
         message = str(excinfo.value)
         assert "not supported for 'html'" in message
-        assert "docx and odt" in message
+        assert _join_with_and(REFERENCE_DOC_FORMATS) in message
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -610,3 +622,98 @@ class TestReferenceDocSupport:
             )
 
         assert "Reference document not found" in str(excinfo.value)
+
+
+class TestFormatDirectionality:
+    """Pandoc reads and writes different sets of formats, and the schema must say so.
+
+    The input and output enums were a single shared list until pptx was exposed. These
+    tests exist to stop them being collapsed back together, which would re-advertise
+    every writable format as readable.
+    """
+
+    def test_input_and_output_lists_differ_only_by_write_only_formats(self):
+        """pptx is writable but not readable on the pandoc versions this project supports."""
+        assert set(OUTPUT_FORMATS) - set(INPUT_FORMATS) == {"pptx"}
+        assert set(INPUT_FORMATS) - set(OUTPUT_FORMATS) == set()
+
+    def test_reference_doc_formats_are_all_writable(self):
+        """A styling target that cannot be written would be unreachable."""
+        assert set(REFERENCE_DOC_FORMATS) <= set(OUTPUT_FORMATS)
+
+    def test_advanced_formats_are_all_writable(self):
+        """An output_file requirement for a format we cannot write would be dead code."""
+        assert set(ADVANCED_FORMATS) <= set(OUTPUT_FORMATS)
+
+    @pytest.mark.asyncio
+    async def test_schema_enums_are_generated_from_the_constants(self):
+        """The advertised schema and the runtime check must not drift apart."""
+        from mcp_pandoc.server import handle_list_tools
+
+        tool = (await handle_list_tools())[0]
+        properties = tool.input_schema["properties"]
+
+        assert properties["input_format"]["enum"] == list(INPUT_FORMATS)
+        assert properties["output_format"]["enum"] == list(OUTPUT_FORMATS)
+
+    @pytest.mark.asyncio
+    async def test_pptx_output_works_through_the_client_path(self, tmp_path):
+        """A real MCP client must be able to ask for pptx and receive a file.
+
+        Goes through call_tool rather than handle_call_tool, because only call_tool runs
+        the JSON-schema validation a client hits first. A test that skipped it would pass
+        even with pptx missing from the enum.
+        """
+        import mcp.types as types
+        from mcp_pandoc.server import call_tool
+
+        output = str(tmp_path / "deck.pptx")
+        result = await call_tool(
+            None,
+            types.CallToolRequestParams(
+                name="convert-contents",
+                arguments={
+                    "contents": "# Slide One\n\nBody text.",
+                    "output_format": "pptx",
+                    "output_file": output,
+                },
+            ),
+        )
+
+        assert result.is_error is False, result.content[0].text
+        assert os.path.getsize(output) > 0
+
+    @pytest.mark.asyncio
+    async def test_pptx_is_rejected_as_an_input_format(self):
+        """The pptx reader arrived in pandoc 3.8.3 and this project declares no floor. See #54."""
+        import mcp.types as types
+        from mcp_pandoc.server import call_tool
+
+        result = await call_tool(
+            None,
+            types.CallToolRequestParams(
+                name="convert-contents",
+                arguments={"contents": "x", "input_format": "pptx", "output_format": "markdown"},
+            ),
+        )
+
+        assert result.is_error is True
+        assert "pptx" in result.content[0].text
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("output_format", ["odt", "pptx"])
+    async def test_binary_formats_require_an_output_file(self, output_format):
+        """Ask for a path up front rather than letting pandoc fail late.
+
+        Without this, odt returned pandoc's own "Output to odt only works by using a
+        outputfile", which does not name the parameter the caller has to supply.
+        """
+        from mcp_pandoc.server import handle_call_tool
+
+        with pytest.raises(ValueError) as excinfo:
+            await handle_call_tool(
+                "convert-contents",
+                {"contents": "# Test", "output_format": output_format},
+            )
+
+        assert "output_file path is required" in str(excinfo.value)

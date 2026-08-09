@@ -10,12 +10,14 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'output')
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-# All supported formats
-FORMATS = ['md', 'html', 'txt', 'rst', 'tex', 'docx', 'pdf', 'epub', 'ipynb', 'odt']
+# All supported formats. pdf and pptx are write-only: pandoc has no pdf reader in any
+# release, and its pptx reader arrived in 3.8.3, which this project does not require.
+FORMATS = ['md', 'html', 'txt', 'rst', 'tex', 'docx', 'pdf', 'epub', 'ipynb', 'odt', 'pptx']
+WRITE_ONLY_FORMATS = ['pdf', 'pptx']
 
 # Create a dummy fixture file for each format
 for format in FORMATS:
-    if format not in ['pdf', 'docx', 'epub', 'ipynb', 'odt']:
+    if format not in ['pdf', 'pptx', 'docx', 'epub', 'ipynb', 'odt']:
         with open(os.path.join(FIXTURE_DIR, f'test.{format}'), 'w') as f:
             f.write(f'# Test Document\n\nThis is a test document for pandoc conversion from {format}.\n')
 
@@ -32,9 +34,9 @@ def test_bidirectional_conversions(from_format, to_format):
     if from_format == to_format:
         pytest.skip("Skipping conversion from a format to itself.")
 
-    # PDF is a special case, we can only convert *to* it, not *from* it with pandoc easily
-    if from_format == 'pdf':
-        pytest.skip("Skipping conversion from PDF as it is not reliably supported by pandoc.")
+    # pdf and pptx are write-only. There is no fixture to read from, by design.
+    if from_format in WRITE_ONLY_FORMATS:
+        pytest.skip(f"Skipping conversion from {from_format}: this project treats it as write-only.")
 
     # For this test, we will only test converting *to* pdf from markdown
     if to_format == 'pdf' and from_format != 'md':
