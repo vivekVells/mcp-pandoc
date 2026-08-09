@@ -340,3 +340,85 @@ class TestVersionUpdate:
         assert yaml
         assert pandocfilters
         assert panflute
+
+class TestReferenceDocSupport:
+    """Test the reference_doc functionality for Issue #52"""
+
+    def setup_method(self):
+        """Setup test fixtures"""
+        self.temp_dir = tempfile.mkdtemp()
+
+    def teardown_method(self):
+        """Cleanup test fixtures"""
+        import shutil
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def test_pandoc_supports_reference_doc_formats(self):
+        """Sanity check that pandoc itself accepts --reference-doc for all three writers"""
+        import pypandoc
+        
+        ref_docx = os.path.join(self.temp_dir, 'test_ref.docx')
+        ref_odt = os.path.join(self.temp_dir, 'test_ref.odt')
+        ref_pptx = os.path.join(self.temp_dir, 'test_ref.pptx')
+
+        pypandoc.convert_text('# Reference', 'docx', format='md', outputfile=ref_docx)
+        pypandoc.convert_text('# Reference', 'odt', format='md', outputfile=ref_odt)
+        pypandoc.convert_text('# Reference', 'pptx', format='md', outputfile=ref_pptx)
+
+        out_docx = os.path.join(self.temp_dir, 'out_ref.docx')
+        out_odt = os.path.join(self.temp_dir, 'out_ref.odt')
+        out_pptx = os.path.join(self.temp_dir, 'out_ref.pptx')
+
+        pypandoc.convert_text('# Content', 'docx', format='md', outputfile=out_docx, extra_args=['--reference-doc', ref_docx])
+        assert os.path.exists(out_docx)
+
+        pypandoc.convert_text('# Content', 'odt', format='md', outputfile=out_odt, extra_args=['--reference-doc', ref_odt])
+        assert os.path.exists(out_odt)
+
+        pypandoc.convert_text('# Content', 'pptx', format='md', outputfile=out_pptx, extra_args=['--reference-doc', ref_pptx])
+        assert os.path.exists(out_pptx)
+
+    @pytest.mark.asyncio
+    async def test_reference_doc_accepted_for_odt(self):
+        """reference_doc must be accepted end-to-end for odt output."""
+        import pypandoc
+        from mcp_pandoc.server import handle_call_tool
+
+        ref_odt = os.path.join(self.temp_dir, "ref.odt")
+        out_odt = os.path.join(self.temp_dir, "out.odt")
+        pypandoc.convert_text("# Reference", "odt", format="md", outputfile=ref_odt)
+
+        await handle_call_tool(
+            "convert-contents",
+            {
+                "contents": "# Content",
+                "output_format": "odt",
+                "output_file": out_odt,
+                "reference_doc": ref_odt,
+            },
+        )
+
+        assert os.path.exists(out_odt)
+        assert os.path.getsize(out_odt) > 0
+
+    @pytest.mark.asyncio
+    async def test_reference_doc_rejection_message(self):
+        """Test that unsupported formats are rejected with the specific format named"""
+        from mcp_pandoc.server import handle_call_tool
+
+        ref_file = os.path.join(self.temp_dir, 'temp_ref.docx')
+        open(ref_file, 'a').close()
+        
+        args = {
+            "contents": "# Test",
+            "output_format": "html",
+            "reference_doc": ref_file
+        }
+        
+        with pytest.raises(ValueError) as excinfo:
+            await handle_call_tool("convert-contents", args)
+        
+        error_msg = str(excinfo.value)
+        assert "not supported for 'html'" in error_msg
+        assert "docx, odt, pptx" in error_msg

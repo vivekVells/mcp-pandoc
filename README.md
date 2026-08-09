@@ -66,7 +66,7 @@ More to come...
      - `input_format` (string): Source format of the content (defaults to markdown)
      - `output_format` (string): Target format (defaults to markdown)
      - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
-     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx output format)
+     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx, odt and pptx output formats)
      - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options
      - `filters` (array): List of Pandoc filter paths to apply during conversion
    - Supported input/output formats:
@@ -131,16 +131,16 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 ### Format Categories
 
-| Category     | Formats                     | Requirements                    |
-| ------------ | --------------------------- | ------------------------------- |
-| **Basic**    | MD, HTML, TXT, IPYNB, ODT   | None                            |
-| **Advanced** | DOCX, PDF, RST, LaTeX, EPUB | Must specify `output_file` path |
-| **Styled**   | DOCX with reference doc     | Custom template support ⭐      |
+| Category     | Formats                            | Requirements                      |
+| ------------ | ---------------------------------- | ----------------------------------|
+| **Basic**    | MD, HTML, TXT, IPYNB, ODT          | None                              |
+| **Advanced** | DOCX, PDF, RST, LaTeX, EPUB        | Must specify `output_file` path   |
+| **Styled**   | DOCX, ODT, PPTX with reference doc | Custom template support ⭐        |
 
 ### Requirements by Format
 
 - **PDF (.pdf)** - requires TeX Live installation
-- **DOCX (.docx)** - supports custom styling via reference documents
+- **DOCX (.docx), ODT (.odt), PPTX (.pptx)** - supports custom styling via reference documents
 - **All others** - no additional requirements
 
 Note: For advanced formats:
@@ -284,7 +284,7 @@ To use the published one
 4. **Reference Document Issues**
    - Error: "Reference document not found"
    - Solution: Ensure the reference document path exists and is accessible
-   - Note: Reference documents only work with DOCX output format
+   - Note: Reference documents work with DOCX, ODT and PPTX output formats
    - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`
 
 ## Quickstart

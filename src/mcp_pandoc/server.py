@@ -8,6 +8,7 @@ import yaml
 from jsonschema import ValidationError, validate
 from mcp.server import Server, ServerRequestContext
 
+REFERENCE_DOC_FORMATS = ("docx", "odt", "pptx")
 
 async def handle_list_tools() -> list[types.Tool]:
     """List available tools.
@@ -60,9 +61,9 @@ async def handle_list_tools() -> list[types.Tool]:
                 "2. The desired output format\n"
                 "3. For advanced formats: complete output path + filename + extension\n"
                 "Example: 'Convert this markdown to PDF and save as /path/to/output.pdf'\n\n"
-                "🎨 DOCX STYLING (NEW FEATURE):\n"
-                "4. Custom DOCX Styling with Reference Documents:\n"
-                "   * Use reference_doc parameter to apply professional styling to DOCX output\n"
+                "🎨 DOCX, ODT & PPTX STYLING (NEW FEATURE):\n"
+                "4. Custom Styling with Reference Documents:\n"
+                "   * Use reference_doc parameter to apply professional styling to DOCX, ODT, and PPTX output\n"
                 "   * Create custom templates with your branding, fonts, and formatting\n"
                 "   * Perfect for corporate reports, academic papers, and professional documents\n"
                 "   * Example: 'Convert this report to DOCX using /templates/corporate-style.docx as reference "
@@ -130,7 +131,7 @@ async def handle_list_tools() -> list[types.Tool]:
                         "type": "string",
                         "description": (
                             "Path to a reference document to use for styling "
-                            "(supported for docx output format)"
+                            "(supported for docx, odt and pptx output formats)"
                         )
                     },
                     "filters": {
@@ -185,8 +186,11 @@ async def handle_call_tool(
 
     # Validate reference_doc if provided
     if reference_doc:
-        if output_format != "docx":
-            raise ValueError("reference_doc parameter is only supported for docx output format")
+        if output_format not in REFERENCE_DOC_FORMATS:
+            raise ValueError(
+                f"reference_doc is not supported for '{output_format}' output format. "
+                f"Supported formats: {', '.join(REFERENCE_DOC_FORMATS)}"
+            )
         if not os.path.exists(reference_doc):
             raise ValueError(f"Reference document not found: {reference_doc}")
 
@@ -348,11 +352,9 @@ async def handle_call_tool(
                 "-V", "geometry:margin=1in"
             ])
 
-        # Handle reference doc for docx format
-        if reference_doc and output_format == "docx":
-            extra_args.extend([
-                "--reference-doc", reference_doc
-            ])
+        # Handle reference doc for docx, odt and pptx formats
+        if reference_doc and output_format in REFERENCE_DOC_FORMATS:
+            extra_args.extend(["--reference-doc", reference_doc])
 
         # No special processing needed for content
 
