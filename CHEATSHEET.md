@@ -207,7 +207,7 @@ bibliography: references.bib"
 | "xelatex not found"                     | Install TeX Live                            |
 | "Reference document not found"          | Check file path exists                      |
 | "output_file path is required"          | Add complete file path for advanced formats |
-| "only supported for docx output format" | Reference docs only work with DOCX          |
+| "reference_doc is not supported for..." | Reference docs work with DOCX, ODT, PPTX    |
 | "Defaults file not found"              | Verify YAML file path and accessibility     |
 | "Filter not executable"                | Check filter permissions: `chmod +x filter.py` |
 | "Invalid YAML in defaults file"        | Validate YAML syntax and structure          |
@@ -221,7 +221,7 @@ bibliography: references.bib"
 | `output_format` | string | ✅       | Target format                 | `"docx"`, `"pdf"`, `"html"` |
 | `output_file`   | string | ⚠️\*\*   | Save location                 | `"/path/output.docx"`       |
 | `input_format`  | string | ❌       | Source format (auto-detected) | `"markdown"`                |
-| `reference_doc` | string | ❌       | DOCX template                 | `"/path/template.docx"`     |
+| `reference_doc` | string | ❌       | DOCX, ODT, PPTX template      | `"/path/template.docx"`     |
 | `defaults_file` | string | ❌       | Pandoc defaults YAML config   | `"/path/defaults.yaml"`     |
 | `filters`       | array  | ❌       | Pandoc filters list           | `["/path/filter.py"]`       |
 
