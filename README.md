@@ -10,7 +10,7 @@
 <!--
 [![Downloads](https://img.shields.io/pypi/dm/mcp-pandoc.svg)](https://pypi.python.org/pypi/mcp-pandoc)
 [![CI](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml/badge.svg)](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml)
-<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a> <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a> 
+<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a> <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a>
 -->
 [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/vivekvells-mcp-pandoc-badge.png)](https://mseep.ai/app/vivekvells-mcp-pandoc)
 <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" />
@@ -66,7 +66,7 @@ More to come...
      - `input_format` (string): Source format of the content (defaults to markdown)
      - `output_format` (string): Target format (defaults to markdown)
      - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
-     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx, odt and pptx output formats)
+     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx and odt output; the file must match the output format)
      - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options
      - `filters` (array): List of Pandoc filter paths to apply during conversion
    - Supported input/output formats:
@@ -131,16 +131,16 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 ### Format Categories
 
-| Category     | Formats                            | Requirements                      |
-| ------------ | ---------------------------------- | ----------------------------------|
-| **Basic**    | MD, HTML, TXT, IPYNB, ODT          | None                              |
-| **Advanced** | DOCX, PDF, RST, LaTeX, EPUB        | Must specify `output_file` path   |
-| **Styled**   | DOCX, ODT, PPTX with reference doc | Custom template support ⭐        |
+| Category     | Formats                       | Requirements                    |
+| ------------ | ----------------------------- | ------------------------------- |
+| **Basic**    | MD, HTML, TXT, IPYNB, ODT     | None                            |
+| **Advanced** | DOCX, PDF, RST, LaTeX, EPUB   | Must specify `output_file` path |
+| **Styled**   | DOCX, ODT with reference doc  | Custom template support ⭐      |
 
 ### Requirements by Format
 
 - **PDF (.pdf)** - requires TeX Live installation
-- **DOCX (.docx), ODT (.odt), PPTX (.pptx)** - supports custom styling via reference documents
+- **DOCX (.docx), ODT (.odt)** - support custom styling via reference documents, and the reference must be the same format as the output
 - **All others** - no additional requirements
 
 Note: For advanced formats:
@@ -243,6 +243,9 @@ To use the published one
 # Converting to DOCX with a reference document template
 "Convert input.md to DOCX using template.docx as reference and save as output.docx"
 
+# Converting to ODT with a reference document template
+"Convert input.md to ODT using template.odt as reference and save as output.odt"
+
 # Step-by-step reference document workflow
 "First create a reference document: pandoc -o custom-reference.docx --print-default-data-file reference.docx" or if you already have one, use that
 "Then convert with custom styling: Convert this text to DOCX using /path/to/custom-reference.docx as reference and save as /path/to/styled-output.docx"
@@ -284,8 +287,10 @@ To use the published one
 4. **Reference Document Issues**
    - Error: "Reference document not found"
    - Solution: Ensure the reference document path exists and is accessible
-   - Note: Reference documents work with DOCX, ODT and PPTX output formats
-   - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`
+   - Error: "reference_doc must be a '.odt' file when output_format is 'odt'"
+   - Solution: The reference document must be the same format as the output. Pandoc does not check this itself: a mismatched reference is silently ignored for DOCX output, and produces an ODT file that cannot be opened
+   - Note: Reference documents work with DOCX and ODT output formats
+   - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`, or `pandoc -o reference.odt --print-default-data-file reference.odt` for ODT
 
 ## Quickstart
 
