@@ -34,6 +34,11 @@ jobs:
     - name: Run yamllint
       run: uv run yamllint .
 
+    # ruff excludes tests/*, so pre-commit is the only thing checking test files
+    # for trailing whitespace and missing final newlines.
+    - name: Run pre-commit
+      run: uv run pre-commit run --all-files
+
     - name: Run pytest
       run: uv run pytest
 

@@ -4,6 +4,8 @@ Map of this repo. Start here, then navigate to the source of truth you need.
 
 Keep this file thin. It is loaded into context on every task, so it points at detail rather than containing it. If you are adding rules, they belong in the linked docs, not here.
 
+`CLAUDE.md` is the standards document behind every review here: semantic versioning policy, the documentation checklist, test organisation, and the PR review framework. Claude Code loads it automatically. **If you are any other agent, read it explicitly.** You will be held to it either way.
+
 ---
 
 ## What this is
@@ -35,7 +37,7 @@ Keep this file thin. It is loaded into context on every task, so it points at de
 | Topic | Doc |
 |---|---|
 | Project philosophy, PR review framework, maintenance standards | [`CLAUDE.md`](CLAUDE.md) |
-| How to contribute, tiered by change size | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| How to contribute, tiered by change size | [`CONTRIBUTING.md`](CONTRIBUTING.md) · read this before opening a PR |
 | User-facing docs | [`README.md`](README.md) · [`CHEATSHEET.md`](CHEATSHEET.md) |
 | Local MCP validation steps | [`MCP_LOCAL_VALIDATION.md`](MCP_LOCAL_VALIDATION.md) |
 | Audits: verified findings behind open work | [`docs/audits/`](docs/audits/) |

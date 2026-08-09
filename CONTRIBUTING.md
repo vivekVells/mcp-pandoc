@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing! Choose your path below:
 
+Start with [`AGENTS.md`](AGENTS.md) for the map of the repo and the non-negotiables. [`CLAUDE.md`](CLAUDE.md) holds the standards every PR is reviewed against: semantic versioning policy, the documentation checklist, and test organisation.
+
 ## 🚀 Quick Start (Simple Changes)
 
 **Fixing docs, typos, or small bugs?**
@@ -109,7 +111,7 @@ sudo apt-get install texlive-xetex
 ## Code Quality Standards
 
 ### Linting (Required)
-**Run before every commit - automated checks prevent regressions:**
+**Run all three before pushing. CI runs all three and will fail if any of them does.**
 
 ```bash
 # Python code quality (catches syntax errors like false vs False)
@@ -117,12 +119,17 @@ uv run ruff check .
 
 # YAML file validation (CI configs, etc.)
 uv run yamllint .
+
+# Trailing whitespace, missing final newlines, YAML/JSON validity
+uv run pre-commit run --all-files
 ```
 
+`ruff` is configured to skip `tests/*`, so test files are covered only by `pre-commit`. If you added or edited a test, run it.
+
 **When to run:**
-- **Before committing**: Pre-commit hooks run these automatically
+- **Before committing**: `pre-commit install` once, and the hooks run on every commit
 - **After changes**: Verify your code meets standards
-- **CI will fail** if linting doesn't pass
+- **CI will fail** if any of the three doesn't pass
 
 **What it catches:**
 - Syntax errors that broke production (PR #31: `false` vs `False`)
@@ -180,16 +187,59 @@ uv run yamllint .
 ## Current Support Matrix
 - **Bidirectional**: md ↔ html ↔ txt ↔ docx ↔ rst ↔ latex ↔ epub ↔ ipynb ↔ odt
 - **Output Only**: PDF (can convert TO PDF, but not FROM PDF)
-- **Special Features**: DOCX reference document styling
+- **Special Features**: DOCX and ODT reference document styling
 
 ## Adding New Formats
-1. Update `SUPPORTED_FORMATS` in `server.py`
-2. Add to JSON Schema enum validation
-3. Create test fixtures in `tests/fixtures/`
-4. Update documentation and conversion matrix
-5. Test all bidirectional conversions
+1. Update the `supported_formats` set in `handle_call_tool` (`server.py`)
+2. Add the format to the `input_format` and/or `output_format` enum in `handle_list_tools`, but **only to the direction you have verified**
+3. Add to `advanced_formats` if the format is binary and needs an `output_file`
+4. Create test fixtures in `tests/fixtures/`
+5. Update documentation and the conversion matrix in README.md and CHEATSHEET.md
+6. Test the conversions you claim, in the direction you claim them
+
+## Only document what the schema exposes
+
+Pandoc reads and writes different sets of formats, and the version a user has installed changes what is available. Before writing a format into README.md, CHEATSHEET.md, or the tool description, check that it is present in the matching enum in `server.py`, and that you verified it in the direction you are claiming.
+
+The tool description and JSON schema are read by a language model before it decides what to call. A description promising a format the enum rejects makes the model attempt it, fail, and retry.
 
 </details>
+
+## Versioning
+
+Feature commits carry their own version bump. New backwards-compatible feature = MINOR, bug fix = PATCH.
+
+Two files declare it and one test compares them, so they must move together:
+
+| File | What to change |
+|---|---|
+| `pyproject.toml` | `version = "..."` |
+| `src/mcp_pandoc/server.py` | `Server("mcp-pandoc", version="...")` |
+
+Then run `uv sync` so `uv.lock` matches. `tests/test_advanced_features.py` asserts the two agree and will fail if you update only one.
+
+## Reporting your environment
+
+What pandoc can do depends on the **pandoc binary you have installed**, which this project does not pin. A passing test is evidence about your machine, not about pandoc. Include in your PR:
+
+- `pandoc --version` (first line)
+- Operating system and version
+- Python version
+
+State the version alongside any capability claim. Write "pandoc 3.7.0.2 accepts `--reference-doc` for odt", not "pandoc accepts `--reference-doc` for odt".
+
+## AI-assisted contributions
+
+Assistants are welcome here, and [`AGENTS.md`](AGENTS.md) is written for them. If you are one:
+
+1. **Navigate with [`AGENTS.md`](AGENTS.md).** It maps the repo and lists what must never change.
+2. **Read [`CHEATSHEET.md`](CHEATSHEET.md)** to learn what the server actually supports before proposing anything. Do not infer capability from the code alone.
+3. **Add or update tests for the user scenario you changed**, not for coverage. One test that proves the feature does its job beats five that prove a file was created.
+4. **Update [`CHEATSHEET.md`](CHEATSHEET.md) and README.md** if user-visible behaviour changed, including new error messages a user might hit.
+5. **Give reviewers what they need**: the environment block above, the real command output rather than a summary of it, and an explicit note on anything you could not verify.
+6. **Keep the diff to the issue.** If you find an adjacent problem, say so in the PR and open an issue rather than widening the branch.
+
+You are accountable for the diff regardless of how it was produced. A human should run the checks before you push.
 
 ## Getting Help
 
