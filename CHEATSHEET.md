@@ -14,29 +14,31 @@ _Last Updated: June 27, 2025_
 
 ### Bidirectional Conversion Matrix
 
-| From\To      | MD  | HTML | TXT | DOCX | PDF | RST | LaTeX | EPUB | IPYNB | ODT |
-| ------------ | --- | ---- | --- | ---- | --- | --- | ----- | ---- | ----- | --- |
-| **Markdown** | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **HTML**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **TXT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **DOCX**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **RST**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **LaTeX**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **EPUB**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **IPYNB**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **ODT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+| From\To      | MD  | HTML | TXT | DOCX | ODT | RST | LaTeX | EPUB | IPYNB | PDF | PPTX |
+| ------------ | --- | ---- | --- | ---- | --- | --- | ----- | ---- | ----- | --- | ---- |
+| **Markdown**  | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **HTML**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **TXT**       | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **DOCX**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **ODT**       | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **RST**       | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **LaTeX**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **EPUB**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **IPYNB**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
 
-### A Note on PDF Support
+### A Note on Write-Only Formats
 
-This tool uses `pandoc` for conversions, which allows for generating PDF files from the formats listed above. However, converting _from_ a PDF to other formats is not supported. Therefore, PDF should be considered an **output-only** format.
+**PDF** and **PPTX** can be produced but not read, so they have no rows above.
+
+Pandoc has never shipped a PDF reader. Pandoc gained a PowerPoint reader in 3.8.3 (2025-12-01), but Ubuntu 24.04 still ships pandoc 3.1.3 and this project declares no minimum, so `pptx` input is not offered. PPTX **output** needs no particular pandoc version; the writer has existed since pandoc 2.0.5.
 
 ### Format Categories
 
-| Category     | Formats                     | Requirements                    |
-| ------------ | --------------------------- | ------------------------------- |
-| **Basic**    | MD, HTML, TXT, IPYNB, ODT   | None                            |
-| **Advanced** | DOCX, PDF, RST, LaTeX, EPUB | Must specify `output_file` path |
-| **Styled**   | DOCX, ODT with reference doc | Custom template support        |
+| Category     | Formats                                | Requirements                    |
+| ------------ | -------------------------------------- | ------------------------------- |
+| **Basic**    | MD, HTML, TXT, IPYNB                   | None, returned inline           |
+| **Advanced** | DOCX, ODT, PDF, PPTX, RST, LaTeX, EPUB | Must specify `output_file` path |
+| **Styled**   | DOCX, ODT, PPTX with reference doc     | Custom template support         |
 
 ## ⚡ Quick Examples
 
@@ -70,16 +72,20 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 # ODT to Markdown
 "Convert /path/input.odt to Markdown and save as /path/output.md"
+
+# Markdown to PowerPoint (headings become slides)
+"Convert /path/slides.md to PPTX and save as /path/deck.pptx"
 ```
 
 ### Reference Document Styling
 
-The reference document must be the same format as the output: a `.docx` reference for DOCX output, a `.odt` reference for ODT output.
+The reference document must be the same format as the output: `.docx` for DOCX, `.odt` for ODT, `.pptx` for PPTX. Mixing them is rejected.
 
 ```bash
 # Step 1: Create a reference document in the format you will output
 pandoc -o /tmp/reference.docx --print-default-data-file reference.docx
 pandoc -o /tmp/reference.odt  --print-default-data-file reference.odt
+pandoc -o /tmp/reference.pptx --print-default-data-file reference.pptx
 
 # Step 2: Customize it in Word or LibreOffice, then convert with it
 
@@ -92,6 +98,11 @@ This will be styled according to the reference document."
 "Convert this to ODT using /tmp/reference.odt as reference and save as /tmp/styled.odt:
 # Professional Report
 This will be styled according to the reference document."
+
+# PPTX
+"Convert this to PPTX using /tmp/reference.pptx as reference and save as /tmp/deck.pptx:
+# Slide One
+Each heading becomes a slide."
 ```
 
 ### Consistent Configuration with Defaults Files
@@ -181,7 +192,8 @@ bibliography: references.bib"
 | -------------- | ---------------------- | ------------------------- |
 | **PDF**        | TeX Live installed     | Uses XeLaTeX engine       |
 | **DOCX**       | Optional reference doc | Supports custom styling, reference must be `.docx` |
-| **ODT**        | Optional reference doc | Supports custom styling, reference must be `.odt`  |
+| **ODT**        | Output file required   | Custom styling, reference must be `.odt`  |
+| **PPTX**       | Output file required   | Write-only. Custom styling, reference must be `.pptx` |
 | **EPUB**       | Output file required   | Good for e-books          |
 | **LaTeX**      | Output file required   | Academic documents        |
 | **Defaults**   | YAML format           | Reusable configurations   |
@@ -193,9 +205,10 @@ bibliography: references.bib"
 | ----------------------- | ------------------------------------------------------------- |
 | **Create default DOCX** | `pandoc -o ref.docx --print-default-data-file reference.docx` |
 | **Create default ODT**  | `pandoc -o ref.odt --print-default-data-file reference.odt`   |
+| **Create default PPTX** | `pandoc -o ref.pptx --print-default-data-file reference.pptx` |
 | **Corporate branding**  | Customize the reference in Word/LibreOffice → Save            |
 | **Apply styling**       | Add `reference_doc: "/path/to/ref.docx"` parameter            |
-| **Match the format**    | `.docx` reference for DOCX output, `.odt` reference for ODT output. Mixing them is rejected |
+| **Match the format**    | `.docx` for DOCX, `.odt` for ODT, `.pptx` for PPTX. Mixing them is rejected |
 
 ### Defaults Files
 
@@ -236,12 +249,12 @@ bibliography: references.bib"
 | `output_format` | string | ✅       | Target format                 | `"docx"`, `"pdf"`, `"html"` |
 | `output_file`   | string | ⚠️\*\*   | Save location                 | `"/path/output.docx"`       |
 | `input_format`  | string | ❌       | Source format (auto-detected) | `"markdown"`                |
-| `reference_doc` | string | ❌       | DOCX or ODT template, matching the output format | `"/path/template.docx"` |
+| `reference_doc` | string | ❌       | DOCX, ODT or PPTX template, matching the output format | `"/path/template.docx"` |
 | `defaults_file` | string | ❌       | Pandoc defaults YAML config   | `"/path/defaults.yaml"`     |
 | `filters`       | array  | ❌       | Pandoc filters list           | `["/path/filter.py"]`       |
 
 \*Either `contents` OR `input_file` required
-\*\*Required for: PDF, DOCX, RST, LaTeX, EPUB
+\*\*Required for: PDF, DOCX, ODT, PPTX, RST, LaTeX, EPUB
 
 ---
 
