@@ -290,6 +290,24 @@ Tracked in [#51](https://github.com/vivekVells/mcp-pandoc/issues/51).
 
 **Out of scope and unaddressed:** the trust boundary. Inbound documents originate from third parties, the server accepts arbitrary filesystem paths, and it executes user-supplied filter scripts. See [#36](https://github.com/vivekVells/mcp-pandoc/issues/36) and [#33](https://github.com/vivekVells/mcp-pandoc/issues/33).
 
+## What has been acted on
+
+The audit itself is a record and is not rewritten. This table tracks what shipped.
+
+| Finding | Status | Where |
+|---|---|---|
+| 6, `reference_doc` gated to docx only | **Done** in v0.10.0 | Widened to docx and odt in [#59](https://github.com/vivekVells/mcp-pandoc/pull/59). That PR also surfaced a failure the audit missed: pandoc does not check that the reference document matches the writer, so a `.docx` reference against odt output wrote a file pandoc could not read, and a `.odt` reference against docx output was silently discarded, both reported as success. Now rejected before conversion |
+| 3, format support is directional but the schema is symmetric | **Partly done** in v0.11.0 | The shared enum was split into `INPUT_FORMATS` and `OUTPUT_FORMATS`. `pdf` is still wrongly listed as an input format; see [#47](https://github.com/vivekVells/mcp-pandoc/issues/47) |
+| 2, pptx supported by pandoc but exposed in neither direction | **Half done** in v0.11.0 | pptx **output** shipped, and needs no minimum pandoc version: the writer has existed since pandoc 2.0.5 (2017). pptx **input** needs pandoc >= 3.8.3 and remains blocked on Finding 9 |
+| 9, no minimum pandoc binary version declared | **Open**, with a decision | [#54](https://github.com/vivekVells/mcp-pandoc/issues/54) carries the evidence. A hard floor is rejected: Ubuntu 24.04 ships pandoc 3.1.3 and Debian trixie 3.1.11.1, so a floor at 3.8.3 would break users following our own install instructions, and would fail our own CI. The direction is per-feature minimums checked at point of use |
+| 1, `pdf` offered as an input format | **Open** | [#47](https://github.com/vivekVells/mcp-pandoc/issues/47). One line now that `INPUT_FORMATS` is its own constant. Worth doing with Finding 4, since both are the input enum advertising something that cannot work |
+| 4, `input_format: "txt"` fails | **Open** | [#57](https://github.com/vivekVells/mcp-pandoc/issues/57). Cheaper now that the enums are split |
+| 7, bare `print()` | **Open** | [#50](https://github.com/vivekVells/mcp-pandoc/issues/50) |
+| 5, docx to markdown drops images | **Open** | [#48](https://github.com/vivekVells/mcp-pandoc/issues/48) |
+| 8, CI install and platform coverage | **Partly done** | `pre-commit` now runs in CI. Fresh-resolution install and the Windows and Python 3.13 matrix remain open in [#45](https://github.com/vivekVells/mcp-pandoc/issues/45) and [#46](https://github.com/vivekVells/mcp-pandoc/issues/46) |
+
+New since the audit: [#60](https://github.com/vivekVells/mcp-pandoc/issues/60), the reference-document type check is still bypassable through `reference-doc` inside a `defaults_file`.
+
 ## Revision history
 
 | Date | Change |

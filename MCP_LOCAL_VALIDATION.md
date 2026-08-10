@@ -64,6 +64,7 @@ the prerequisite step.
 7. output_format txt, output_file <validation-directory>/output.txt
 8. output_format ipynb, output_file <validation-directory>/output.ipynb
 9. output_format odt, output_file <validation-directory>/output.odt
+10. output_format pptx, output_file <validation-directory>/output.pptx
 
 Do not modify the source file. Report the result of every MCP call.
 ```
@@ -71,15 +72,15 @@ Do not modify the source file. Report the result of every MCP call.
 Validate the outputs:
 
 ```bash
-for extension in html docx pdf rst tex epub txt ipynb odt; do
+for extension in html docx pdf rst tex epub txt ipynb odt pptx; do
   test -s "$VALIDATION_DIR/output.$extension"
 done
 
-file "$VALIDATION_DIR"/output.{html,docx,pdf,rst,tex,epub,txt,ipynb,odt}
+file "$VALIDATION_DIR"/output.{html,docx,pdf,rst,tex,epub,txt,ipynb,odt,pptx}
 
 rg -q "MCP-Pandoc Test Document" "$VALIDATION_DIR"/output.{html,rst,tex,txt,ipynb}
 
-for extension in docx epub odt; do
+for extension in docx epub odt pptx; do
   pandoc "$VALIDATION_DIR/output.$extension" -t plain |
     rg -q "MCP-Pandoc Test Document"
 done
@@ -135,6 +136,7 @@ Validate the mcp-pandoc-sdk2-local MCP server.
    - TXT: <validation-directory>/output.txt
    - IPYNB: <validation-directory>/output.ipynb
    - ODT: <validation-directory>/output.odt
+   - PPTX: <validation-directory>/output.pptx
 3. Verify every output exists and is non-empty.
 4. Verify the HTML, RST, LaTeX, TXT, and IPYNB outputs contain
    "MCP-Pandoc Test Document".

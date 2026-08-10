@@ -8,10 +8,21 @@ import yaml
 from jsonschema import ValidationError, validate
 from mcp.server import Server, ServerRequestContext
 
-# Output formats that accept pandoc's --reference-doc. Pandoc also accepts it for
-# pptx, but pptx is not an output format here yet; see issue #49. Add it in the same
-# change that adds pptx to the output_format enum, never before.
-REFERENCE_DOC_FORMATS = ("docx", "odt")
+# Pandoc reads and writes different sets of formats, so these two lists are deliberately
+# separate and must not be collapsed back into one. Only add a format to the direction
+# that has been verified in that direction.
+#
+# pptx is write-only here. Pandoc has written pptx since 2.0.5 (2017), so no minimum
+# pandoc version is needed for output. The pptx reader only arrived in 3.8.3 (2025-12-01),
+# which Ubuntu 24.04 and Debian trixie do not ship, so pptx input waits on #54.
+INPUT_FORMATS = ("markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt", "ipynb", "odt")
+OUTPUT_FORMATS = ("markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt", "ipynb", "odt", "pptx")
+
+# Formats returned as a file rather than inline, so they require an explicit output_file.
+ADVANCED_FORMATS = ("pdf", "docx", "rst", "latex", "epub", "odt", "pptx")
+
+# Output formats that accept pandoc's --reference-doc.
+REFERENCE_DOC_FORMATS = ("docx", "odt", "pptx")
 
 
 def _join_with_and(values) -> str:
@@ -54,9 +65,10 @@ async def handle_list_tools() -> list[types.Tool]:
                 "   * You can find your converted file at the specified location\n"
                 "   * If no path is specified, files may be saved in system temp directory (/tmp/ on Unix systems)\n"
                 "   * For better control, always provide explicit output file paths\n\n"
-                "Supported formats:"
-                "- Basic: txt, html, markdown, ipynb, odt"
-                "- Advanced (REQUIRE complete file paths): pdf, docx, rst, latex, epub"
+                "Supported formats:\n"
+                "- Basic (returned inline): txt, html, markdown, ipynb\n"
+                "- Advanced (REQUIRE complete file paths): pdf, docx, rst, latex, epub, odt, pptx\n"
+                "- pptx is WRITE-ONLY: it can be produced, but not used as an input format\n"
                 "✅ CORRECT Usage Examples:\n"
                 "1. 'Convert this text to HTML' (basic conversion)\n"
                 "   - Tool will show converted content\n\n"
@@ -73,10 +85,11 @@ async def handle_list_tools() -> list[types.Tool]:
                 "2. The desired output format\n"
                 "3. For advanced formats: complete output path + filename + extension\n"
                 "Example: 'Convert this markdown to PDF and save as /path/to/output.pdf'\n\n"
-                "🎨 DOCX & ODT STYLING (NEW FEATURE):\n"
+                "🎨 DOCX, ODT & PPTX STYLING:\n"
                 "4. Custom Styling with Reference Documents:\n"
-                "   * Use reference_doc parameter to apply professional styling to DOCX and ODT output\n"
-                "   * The reference document MUST match the output format: .docx for docx, .odt for odt\n"
+                "   * Use reference_doc parameter to apply professional styling to DOCX, ODT and PPTX output\n"
+                "   * The reference document MUST match the output format: .docx for docx, .odt for odt,\n"
+                "     .pptx for pptx\n"
                 "   * Create custom templates with your branding, fonts, and formatting\n"
                 "   * Perfect for corporate reports, academic papers, and professional documents\n"
                 "   * Example: 'Convert this report to DOCX using /templates/corporate-style.docx as reference "
@@ -125,27 +138,30 @@ async def handle_list_tools() -> list[types.Tool]:
                         "type": "string",
                         "description": "Source format of the content (defaults to markdown)",
                         "default": "markdown",
-                        "enum": ["markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt", "ipynb", "odt"]
+                        "enum": list(INPUT_FORMATS)
                     },
                     "output_format": {
                         "type": "string",
-                        "description": "Desired output format (defaults to markdown)",
+                        "description": (
+                            "Desired output format (defaults to markdown). Note pptx is write-only: "
+                            "it can be produced but not read."
+                        ),
                         "default": "markdown",
-                        "enum": ["markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt", "ipynb", "odt"]
+                        "enum": list(OUTPUT_FORMATS)
                     },
                     "output_file": {
                         "type": "string",
                         "description": (
                             "Complete path where to save the output including filename and extension "
-                            "(required for pdf, docx, rst, latex, epub formats)"
+                            f"(required for {', '.join(ADVANCED_FORMATS)} formats)"
                         )
                     },
                     "reference_doc": {
                         "type": "string",
                         "description": (
-                            "Path to a reference document to use for styling. Supported for docx and "
-                            "odt output. The file must match the output format: a .docx reference for "
-                            "docx output, a .odt reference for odt output."
+                            "Path to a reference document to use for styling. Supported for docx, odt "
+                            "and pptx output. The file must match the output format: a .docx reference "
+                            "for docx output, .odt for odt, .pptx for pptx."
                         )
                     },
                     "filters": {
@@ -253,16 +269,22 @@ async def handle_call_tool(
         except Exception as e:
             raise ValueError(f"Error reading defaults file {defaults_file}: {str(e)}") from e
 
-    # Define supported formats
-    supported_formats = {'html', 'markdown', 'pdf', 'docx', 'rst', 'latex', 'epub', 'txt', 'ipynb', 'odt'}
-    if output_format not in supported_formats:
+    # Validate the output format against the single list the schema also advertises, so
+    # the runtime check and the enum cannot drift apart.
+    if output_format not in OUTPUT_FORMATS:
         raise ValueError(
-            f"Unsupported output format: '{output_format}'. Supported formats are: {', '.join(supported_formats)}"
+            f"Unsupported output format: '{output_format}'. Supported formats are: {', '.join(OUTPUT_FORMATS)}"
+        )
+
+    if input_format not in INPUT_FORMATS:
+        raise ValueError(
+            f"Unsupported input format: '{input_format}'. Supported input formats are: "
+            f"{', '.join(INPUT_FORMATS)}. Pandoc writes some formats it cannot read, so the "
+            f"input list is shorter than the output list."
         )
 
     # Validate output_file requirement for advanced formats
-    advanced_formats = {'pdf', 'docx', 'rst', 'latex', 'epub'}
-    if output_format in advanced_formats and not output_file:
+    if output_format in ADVANCED_FORMATS and not output_file:
         raise ValueError(f"output_file path is required for {output_format} format")
 
     # Validate filters if provided
@@ -524,7 +546,7 @@ async def call_tool(
 
 server = Server(
     "mcp-pandoc",
-    version="0.10.0",
+    version="0.11.0",
     on_list_tools=list_tools,
     on_call_tool=call_tool,
 )

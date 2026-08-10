@@ -65,22 +65,27 @@ More to come...
      - `input_file` (string): Complete path to input file (required if contents not provided)
      - `input_format` (string): Source format of the content (defaults to markdown)
      - `output_format` (string): Target format (defaults to markdown)
-     - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub formats)
-     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx and odt output; the file must match the output format)
+     - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub, odt, pptx formats)
+     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx, odt and pptx output; the file must match the output format)
      - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options
      - `filters` (array): List of Pandoc filter paths to apply during conversion
-   - Supported input/output formats:
-     - markdown
-     - html
-     - pdf
-     - docx
-     - rst
-     - latex
-     - epub
-     - txt
-     - ipynb
-     - odt
-   - Note: For advanced formats (pdf, docx, rst, latex, epub), an output_file path is required
+   - Supported formats, by direction:
+
+     | Format | Read | Write |
+     | -------- | :--: | :---: |
+     | markdown | ✅ | ✅ |
+     | html | ✅ | ✅ |
+     | docx | ✅ | ✅ |
+     | odt | ✅ | ✅ |
+     | rst | ✅ | ✅ |
+     | latex | ✅ | ✅ |
+     | epub | ✅ | ✅ |
+     | ipynb | ✅ | ✅ |
+     | txt | ✅ | ✅ |
+     | **pdf** | ❌ | ✅ |
+     | **pptx** | ❌ | ✅ |
+
+   - Note: For advanced formats (pdf, docx, rst, latex, epub, odt, pptx), an output_file path is required
 
 ### 🔧 Advanced Features
 
@@ -113,34 +118,40 @@ Example usage: `"Convert docs.md to HTML with filters ['/path/to/mermaid-filter.
 
 ### Bidirectional Conversion Matrix
 
-| From\To      | MD  | HTML | TXT | DOCX | PDF | RST | LaTeX | EPUB | IPYNB | ODT |
-| ------------ | --- | ---- | --- | ---- | --- | --- | ----- | ---- | ----- | --- |
-| **Markdown** | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **HTML**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **TXT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **DOCX**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **RST**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **LaTeX**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **EPUB**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **IPYNB**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
-| **ODT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  |
+Rows are source formats, columns are targets. PDF and PPTX have no rows because pandoc cannot read them.
 
-### A Note on PDF Support
+| From\To      | MD  | HTML | TXT | DOCX | ODT | RST | LaTeX | EPUB | IPYNB | PDF | PPTX |
+| ------------ | --- | ---- | --- | ---- | --- | --- | ----- | ---- | ----- | --- | ---- |
+| **Markdown** | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **HTML**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **TXT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **DOCX**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **ODT**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **RST**      | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **LaTeX**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **EPUB**     | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
+| **IPYNB**    | ✅  | ✅   | ✅  | ✅   | ✅  | ✅  | ✅    | ✅   | ✅    | ✅  | ✅   |
 
-This tool uses `pandoc` for conversions, which allows for generating PDF files from the formats listed above. However, converting _from_ a PDF to other formats is not supported. Therefore, PDF should be considered an **output-only** format.
+### A Note on Write-Only Formats
+
+**PDF** and **PPTX** can be produced but not read.
+
+Pandoc has never shipped a PDF reader. Pandoc gained a PowerPoint reader in 3.8.3 (released 2025-12-01), but this project declares no minimum pandoc version, and Ubuntu 24.04 still ships pandoc 3.1.3, so `pptx` input is not offered. Tracked in [#54](https://github.com/vivekVells/mcp-pandoc/issues/54) and [#49](https://github.com/vivekVells/mcp-pandoc/issues/49).
+
+PPTX **output** needs no particular pandoc version. The PowerPoint writer has existed since pandoc 2.0.5.
 
 ### Format Categories
 
-| Category     | Formats                       | Requirements                    |
-| ------------ | ----------------------------- | ------------------------------- |
-| **Basic**    | MD, HTML, TXT, IPYNB, ODT     | None                            |
-| **Advanced** | DOCX, PDF, RST, LaTeX, EPUB   | Must specify `output_file` path |
-| **Styled**   | DOCX, ODT with reference doc  | Custom template support ⭐      |
+| Category     | Formats                            | Requirements                    |
+| ------------ | ---------------------------------- | ------------------------------- |
+| **Basic**    | MD, HTML, TXT, IPYNB               | None, returned inline           |
+| **Advanced** | DOCX, ODT, PDF, PPTX, RST, LaTeX, EPUB | Must specify `output_file` path |
+| **Styled**   | DOCX, ODT, PPTX with reference doc | Custom template support ⭐      |
 
 ### Requirements by Format
 
 - **PDF (.pdf)** - requires TeX Live installation
-- **DOCX (.docx), ODT (.odt)** - support custom styling via reference documents, and the reference must be the same format as the output
+- **DOCX (.docx), ODT (.odt), PPTX (.pptx)** - support custom styling via reference documents, and the reference must be the same format as the output
 - **All others** - no additional requirements
 
 Note: For advanced formats:
@@ -246,6 +257,9 @@ To use the published one
 # Converting to ODT with a reference document template
 "Convert input.md to ODT using template.odt as reference and save as output.odt"
 
+# Converting to a branded PowerPoint deck
+"Convert slides.md to PPTX using template.pptx as reference and save as deck.pptx"
+
 # Step-by-step reference document workflow
 "First create a reference document: pandoc -o custom-reference.docx --print-default-data-file reference.docx" or if you already have one, use that
 "Then convert with custom styling: Convert this text to DOCX using /path/to/custom-reference.docx as reference and save as /path/to/styled-output.docx"
@@ -289,8 +303,8 @@ To use the published one
    - Solution: Ensure the reference document path exists and is accessible
    - Error: "reference_doc must be a '.odt' file when output_format is 'odt'"
    - Solution: The reference document must be the same format as the output. Pandoc does not check this itself: a mismatched reference is silently ignored for DOCX output, and produces an ODT file that cannot be opened
-   - Note: Reference documents work with DOCX and ODT output formats
-   - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`, or `pandoc -o reference.odt --print-default-data-file reference.odt` for ODT
+   - Note: Reference documents work with DOCX, ODT and PPTX output formats
+   - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`, and likewise with `reference.odt` or `reference.pptx`
 
 ## Quickstart
 
