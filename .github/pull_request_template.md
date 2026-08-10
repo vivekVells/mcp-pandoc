@@ -2,16 +2,27 @@
 
 Brief description of what this PR changes and why.
 
+## Environment
+
+Format support depends on the pandoc binary you have installed, which this project does not pin. Please fill this in.
+
+- pandoc: <!-- first line of `pandoc --version` -->
+- OS:
+- Python:
+
 ## Essential Checklist
 
-- [ ] Tests pass locally (`uv run pytest tests/test_conversions.py`)
+- [ ] `uv run pytest` passes (paste the summary line below)
+- [ ] `uv run ruff check .` passes
+- [ ] `uv run yamllint .` passes
+- [ ] `uv run pre-commit run --all-files` passes
 - [ ] Code follows existing patterns in `src/mcp_pandoc/server.py`
 - [ ] Documentation updated (if needed)
-- [ ] Screenshots included below for visual verification
+- [ ] Every format I documented is present in the matching enum in `server.py`, verified in the direction I claimed it
 
-## Screenshots (Required)
+## Screenshots (if your change has visible output)
 
-Please include screenshots to help reviewers verify your changes:
+Not needed for backend or validation-only changes; paste the test output instead.
 
 **For new features or format support:**
 - [ ] Before/after conversion examples showing the new functionality
@@ -31,7 +42,8 @@ Please include screenshots to help reviewers verify your changes:
 <details>
 <summary>🔄 Format Support Changes (expand if adding/modifying formats)</summary>
 
-- [ ] New format added to `SUPPORTED_FORMATS` in server.py
+- [ ] New format added to the `supported_formats` set in `handle_call_tool` (server.py)
+- [ ] Added only to the `input_format` / `output_format` enum direction that was verified
 - [ ] Bidirectional conversion testing included
 - [ ] Test fixtures added to `tests/fixtures/`
 - [ ] Conversion matrix in README.md updated

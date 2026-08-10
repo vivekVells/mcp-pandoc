@@ -36,7 +36,7 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 | ------------ | --------------------------- | ------------------------------- |
 | **Basic**    | MD, HTML, TXT, IPYNB, ODT   | None                            |
 | **Advanced** | DOCX, PDF, RST, LaTeX, EPUB | Must specify `output_file` path |
-| **Styled**   | DOCX with reference doc     | Custom template support         |
+| **Styled**   | DOCX, ODT with reference doc | Custom template support        |
 
 ## ⚡ Quick Examples
 
@@ -74,12 +74,22 @@ This tool uses `pandoc` for conversions, which allows for generating PDF files f
 
 ### Reference Document Styling
 
-```bash
-# Step 1: Create reference document
-pandoc -o /tmp/reference.docx --print-default-data-file reference.docx
+The reference document must be the same format as the output: a `.docx` reference for DOCX output, a `.odt` reference for ODT output.
 
-# Step 2: Use reference for styled conversion
+```bash
+# Step 1: Create a reference document in the format you will output
+pandoc -o /tmp/reference.docx --print-default-data-file reference.docx
+pandoc -o /tmp/reference.odt  --print-default-data-file reference.odt
+
+# Step 2: Customize it in Word or LibreOffice, then convert with it
+
+# DOCX
 "Convert this to DOCX using /tmp/reference.docx as reference and save as /tmp/styled.docx:
+# Professional Report
+This will be styled according to the reference document."
+
+# ODT
+"Convert this to ODT using /tmp/reference.odt as reference and save as /tmp/styled.odt:
 # Professional Report
 This will be styled according to the reference document."
 ```
@@ -88,7 +98,7 @@ This will be styled according to the reference document."
 
 ```bash
 # Create a defaults file for academic papers
-"Create defaults file /tmp/academic.yaml with: 
+"Create defaults file /tmp/academic.yaml with:
 from: markdown
 to: pdf
 number-sections: true
@@ -170,7 +180,8 @@ bibliography: references.bib"
 | Format         | Requirements           | Notes                     |
 | -------------- | ---------------------- | ------------------------- |
 | **PDF**        | TeX Live installed     | Uses XeLaTeX engine       |
-| **DOCX**       | Optional reference doc | Supports custom styling   |
+| **DOCX**       | Optional reference doc | Supports custom styling, reference must be `.docx` |
+| **ODT**        | Optional reference doc | Supports custom styling, reference must be `.odt`  |
 | **EPUB**       | Output file required   | Good for e-books          |
 | **LaTeX**      | Output file required   | Academic documents        |
 | **Defaults**   | YAML format           | Reusable configurations   |
@@ -178,11 +189,13 @@ bibliography: references.bib"
 
 ### Reference Documents
 
-| Use Case               | Command                                                       |
-| ---------------------- | ------------------------------------------------------------- |
-| **Create default**     | `pandoc -o ref.docx --print-default-data-file reference.docx` |
-| **Corporate branding** | Customize ref.docx in Word/LibreOffice → Save                 |
-| **Apply styling**      | Add `reference_doc: "/path/to/ref.docx"` parameter            |
+| Use Case                | Command                                                       |
+| ----------------------- | ------------------------------------------------------------- |
+| **Create default DOCX** | `pandoc -o ref.docx --print-default-data-file reference.docx` |
+| **Create default ODT**  | `pandoc -o ref.odt --print-default-data-file reference.odt`   |
+| **Corporate branding**  | Customize the reference in Word/LibreOffice → Save            |
+| **Apply styling**       | Add `reference_doc: "/path/to/ref.docx"` parameter            |
+| **Match the format**    | `.docx` reference for DOCX output, `.odt` reference for ODT output. Mixing them is rejected |
 
 ### Defaults Files
 
@@ -207,7 +220,9 @@ bibliography: references.bib"
 | "xelatex not found"                     | Install TeX Live                            |
 | "Reference document not found"          | Check file path exists                      |
 | "output_file path is required"          | Add complete file path for advanced formats |
-| "only supported for docx output format" | Reference docs only work with DOCX          |
+| "reference_doc is not supported for..." | Reference docs work with DOCX and ODT       |
+| "reference_doc must be a '.odt' file..." | Reference must match the output format      |
+| "Reference document is not a file"      | Path points at a directory, not a file      |
 | "Defaults file not found"              | Verify YAML file path and accessibility     |
 | "Filter not executable"                | Check filter permissions: `chmod +x filter.py` |
 | "Invalid YAML in defaults file"        | Validate YAML syntax and structure          |
@@ -221,11 +236,11 @@ bibliography: references.bib"
 | `output_format` | string | ✅       | Target format                 | `"docx"`, `"pdf"`, `"html"` |
 | `output_file`   | string | ⚠️\*\*   | Save location                 | `"/path/output.docx"`       |
 | `input_format`  | string | ❌       | Source format (auto-detected) | `"markdown"`                |
-| `reference_doc` | string | ❌       | DOCX template                 | `"/path/template.docx"`     |
+| `reference_doc` | string | ❌       | DOCX or ODT template, matching the output format | `"/path/template.docx"` |
 | `defaults_file` | string | ❌       | Pandoc defaults YAML config   | `"/path/defaults.yaml"`     |
 | `filters`       | array  | ❌       | Pandoc filters list           | `["/path/filter.py"]`       |
 
-\*Either `contents` OR `input_file` required  
+\*Either `contents` OR `input_file` required
 \*\*Required for: PDF, DOCX, RST, LaTeX, EPUB
 
 ---
