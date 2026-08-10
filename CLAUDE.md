@@ -10,7 +10,7 @@
 - **MCP Server**: Implements JSON-RPC 2.0 protocol for tool-based document conversion
 - **Primary Tool**: `convert-contents` - handles all format conversions with comprehensive validation
 - **Backend Engine**: Pandoc with pypandoc Python wrapper
-- **Special Features**: Reference document styling for DOCX, advanced format support
+- **Special Features**: Reference document styling for DOCX, ODT and PPTX, advanced format support
 
 ## 🎯 Project Philosophy & Decision Framework
 
@@ -130,15 +130,15 @@ if reference_doc and not os.path.exists(reference_doc):
     raise ValueError(f"Reference document not found: {reference_doc}")
 
 # Format validation pattern (server.py:165-167)
-SUPPORTED_FORMATS = {'html', 'markdown', 'pdf', 'docx', 'rst', 'latex', 'epub', 'txt', 'ipynb', 'odt'}
-if output_format not in SUPPORTED_FORMATS:
+OUTPUT_FORMATS = ("markdown", "html", "pdf", "docx", "rst", "latex", "epub", "txt", "ipynb", "odt", "pptx")
+if output_format not in OUTPUT_FORMATS:
     raise ValueError(f"Unsupported output format: '{output_format}'")
 ```
 
 ### Tool Architecture Pattern
 - **Parameter Validation**: oneOf/allOf JSON Schema constraints for required parameters
 - **Conditional Requirements**: Advanced formats require output_file paths
-- **Reference Document Support**: DOCX-specific styling with template validation
+- **Reference Document Support**: DOCX, ODT and PPTX styling, with the reference type validated against the output format
 
 ## Testing Strategy
 
@@ -151,7 +151,7 @@ def test_bidirectional_conversions(from_format, to_format):
 ```
 
 ### Test Coverage Areas
-- **All Format Combinations**: 10 formats × 10 formats = 100 conversion paths
+- **All Format Combinations**: every readable format against every writable one. pdf and pptx are write-only and are skipped as sources
 - **Fixture Management**: Pre-created test files for each format
 - **Output Validation**: File existence and basic content verification
 - **Edge Cases**: PDF special handling, format-specific requirements
@@ -221,7 +221,7 @@ uv run pytest tests/test_conversions.py -k "md_to_html"
 - [ ] **Format compatibility**: Bidirectional conversion matrix maintained
 
 ### 🔍 Regression Prevention Checklist
-- [ ] **All 10 formats still supported**: md, html, txt, docx, pdf, rst, latex, epub, ipynb, odt
+- [ ] **All formats still supported**: md, html, txt, docx, odt, rst, latex, epub, ipynb readable and writable; pdf and pptx writable only
 - [ ] **Reference document styling works**: DOCX template functionality preserved
 - [ ] **File path requirements enforced**: Advanced formats still require output_file
 - [ ] **Error messages remain helpful**: User-friendly error guidance maintained
@@ -238,8 +238,8 @@ grep -n "outputfile=" src/mcp_pandoc/server.py
 #### Format Support Validation
 ```bash
 # Verify supported formats list is maintained
-grep -n "SUPPORTED_FORMATS" src/mcp_pandoc/server.py
-grep -n "ADVANCED_FORMATS" src/mcp_pandoc/server.py
+grep -n "INPUT_FORMATS\|OUTPUT_FORMATS" src/mcp_pandoc/server.py
+grep -n "ADVANCED_FORMATS\|REFERENCE_DOC_FORMATS" src/mcp_pandoc/server.py
 ```
 
 ## Common Development Patterns
@@ -283,10 +283,11 @@ async def handle_call_tool(
 ## Key Maintenance Notes
 
 ### Format Support Matrix
-- **PDF**: Output-only format (cannot convert FROM PDF reliably)
-- **Advanced Formats**: pdf, docx, rst, latex, epub require output_file parameter
-- **Basic Formats**: md, html, txt, ipynb, odt can display converted content directly
-- **Reference Documents**: Only supported for DOCX output format
+- **Directional**: `INPUT_FORMATS` and `OUTPUT_FORMATS` are separate constants and must stay separate. Pandoc reads and writes different sets
+- **Write-only**: pdf (no pandoc reader in any release) and pptx (reader added in pandoc 3.8.3, not yet exposed; see #54)
+- **Advanced Formats**: `ADVANCED_FORMATS` covers pdf, docx, odt, pptx, rst, latex, epub, all of which require an output_file
+- **Basic Formats**: md, html, txt, ipynb are returned inline
+- **Reference Documents**: `REFERENCE_DOC_FORMATS` covers docx, odt and pptx. The reference file must match the output format; pandoc does not check this and fails silently when it is wrong
 
 ### Dependency Management
 - **Pandoc**: Core conversion engine, must be system-installed

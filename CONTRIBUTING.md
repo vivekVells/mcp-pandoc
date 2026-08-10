@@ -93,10 +93,10 @@ sudo apt-get install texlive-xetex
 ## Core Architecture
 - **MCP Server**: Implements Model Context Protocol for document conversion
 - **Primary Tool**: `convert-contents` handles all format conversions
-- **Supported Formats**: 10 formats with bidirectional conversion support
+- **Supported Formats**: 9 read and write, plus pdf and pptx which are write only
 - **Format Categories**:
-  - **Basic**: md, html, txt, ipynb, odt (can display converted content)
-  - **Advanced**: pdf, docx, rst, latex, epub (require output file paths)
+  - **Basic**: md, html, txt, ipynb (converted content is returned inline)
+  - **Advanced**: pdf, docx, odt, pptx, rst, latex, epub (require output file paths)
 
 ## Key Files
 - `src/mcp_pandoc/server.py`: Core server implementation with tool definitions
@@ -185,9 +185,10 @@ uv run pre-commit run --all-files
 <summary>🔄 Format Support (expand if adding new formats)</summary>
 
 ## Current Support Matrix
-- **Bidirectional**: md ↔ html ↔ txt ↔ docx ↔ rst ↔ latex ↔ epub ↔ ipynb ↔ odt
-- **Output Only**: PDF (can convert TO PDF, but not FROM PDF)
-- **Special Features**: DOCX and ODT reference document styling
+- **Read and write**: md, html, txt, docx, odt, rst, latex, epub, ipynb
+- **Write only**: pdf (pandoc has no PDF reader in any release) and pptx (the pandoc pptx reader arrived in 3.8.3, which most distro packages do not ship yet; see [#54](https://github.com/vivekVells/mcp-pandoc/issues/54))
+- **Require an `output_file`**: pdf, docx, odt, pptx, rst, latex, epub
+- **Reference document styling**: docx, odt, pptx, with the reference matching the output format
 
 ## Adding New Formats
 1. Update the `supported_formats` set in `handle_call_tool` (`server.py`)

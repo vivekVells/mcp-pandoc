@@ -717,3 +717,143 @@ class TestFormatDirectionality:
             )
 
         assert "output_file path is required" in str(excinfo.value)
+
+
+class TestPptxOutputRobustness:
+    """pptx output must work on every path into the converter, not just inline markdown.
+
+    pptx was the first format added after the input and output enums diverged, so these
+    cover the argument-composition paths that a new output format can quietly break:
+    a non-default input_format, the input_file branch, filters, and a defaults file.
+    """
+
+    def setup_method(self):
+        """Create a scratch directory for generated documents."""
+        self.temp_dir = tempfile.mkdtemp()
+
+    def teardown_method(self):
+        """Remove the scratch directory."""
+        import shutil
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def _path(self, name):
+        """Return a path inside this test's scratch directory."""
+        return os.path.join(self.temp_dir, name)
+
+    async def _convert(self, arguments):
+        """Run a conversion through the client path and return the tool result."""
+        import mcp.types as types
+        from mcp_pandoc.server import call_tool
+
+        return await call_tool(
+            None, types.CallToolRequestParams(name="convert-contents", arguments=arguments)
+        )
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("input_format", "contents"),
+        [
+            ("markdown", "# Slide One\n\nBody text.\n\n# Slide Two\n\nMore."),
+            ("html", "<h1>Slide One</h1><p>Body text.</p>"),
+            ("rst", "Slide One\n=========\n\nBody text.\n"),
+        ],
+    )
+    async def test_pptx_output_from_each_input_format(self, input_format, contents):
+        """input_format must be honoured when the target is pptx."""
+        output = self._path(f"from_{input_format}.pptx")
+
+        result = await self._convert(
+            {
+                "contents": contents,
+                "input_format": input_format,
+                "output_format": "pptx",
+                "output_file": output,
+            }
+        )
+
+        assert result.is_error is False, result.content[0].text
+        assert os.path.getsize(output) > 0
+
+    @pytest.mark.asyncio
+    async def test_pptx_output_from_an_input_file(self):
+        """The input_file branch builds its arguments separately from the contents branch."""
+        import pypandoc
+
+        source = self._path("source.docx")
+        output = self._path("from_file.pptx")
+        pypandoc.convert_text("# Slide\n\nBody.", "docx", format="md", outputfile=source)
+
+        result = await self._convert({"input_file": source, "output_format": "pptx", "output_file": output})
+
+        assert result.is_error is False, result.content[0].text
+        assert os.path.getsize(output) > 0
+
+    @pytest.mark.asyncio
+    async def test_pptx_output_with_a_filter(self):
+        """Filters and the pptx writer must compose in extra_args."""
+        filter_path = self._path("passthrough.py")
+        with open(filter_path, "w") as handle:
+            handle.write("#!/usr/bin/env python3\nimport sys, json\njson.dump(json.load(sys.stdin), sys.stdout)\n")
+        os.chmod(filter_path, 0o755)
+        output = self._path("filtered.pptx")
+
+        result = await self._convert(
+            {
+                "contents": "# Slide\n\nBody.",
+                "output_format": "pptx",
+                "output_file": output,
+                "filters": [filter_path],
+            }
+        )
+
+        assert result.is_error is False, result.content[0].text
+        assert os.path.getsize(output) > 0
+
+    @pytest.mark.asyncio
+    async def test_pptx_output_with_a_defaults_file(self):
+        """A defaults file naming pptx must not conflict with the requested format."""
+        defaults_path = self._path("defaults.yaml")
+        with open(defaults_path, "w") as handle:
+            yaml.dump({"to": "pptx"}, handle)
+        output = self._path("with_defaults.pptx")
+
+        result = await self._convert(
+            {
+                "contents": "# Slide\n\nBody.",
+                "output_format": "pptx",
+                "output_file": output,
+                "defaults_file": defaults_path,
+            }
+        )
+
+        assert result.is_error is False, result.content[0].text
+        assert os.path.getsize(output) > 0
+
+    @pytest.mark.asyncio
+    async def test_pptx_output_handles_non_ascii_content(self):
+        """OOXML is zipped XML, so encoding problems surface as a corrupt package."""
+        output = self._path("unicode.pptx")
+
+        result = await self._convert(
+            {
+                "contents": "# Ünïcødé başlık\n\nTürkçe içerik ve emoji 🎯",
+                "output_format": "pptx",
+                "output_file": output,
+            }
+        )
+
+        assert result.is_error is False, result.content[0].text
+        assert os.path.getsize(output) > 0
+
+    @pytest.mark.asyncio
+    async def test_pptx_output_without_headings_still_produces_a_deck(self):
+        """Content with no headings has no slide breaks. Pandoc still writes a valid deck."""
+        output = self._path("no_headings.pptx")
+
+        result = await self._convert(
+            {"contents": "Just a paragraph, no headings.", "output_format": "pptx", "output_file": output}
+        )
+
+        assert result.is_error is False, result.content[0].text
+        assert os.path.getsize(output) > 0
