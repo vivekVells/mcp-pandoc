@@ -43,6 +43,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.11", "3.13"]
     runs-on: ${{ matrix.os }}
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -67,7 +69,7 @@ jobs:
       run: pip install uv
 
     - name: Sync dependencies (all groups)
-      run: uv sync --python "${{ matrix.python-version }}" --all-groups
+      run: uv sync --all-groups
 
     - name: Verify matrix Python
       env:
