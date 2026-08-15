@@ -82,4 +82,4 @@ async def test_modern_client_preserves_tool_contract(tmp_path):
     assert missing.is_error is True
     assert missing.content[0].text == "Missing arguments"
     assert txt.is_error is False
-    assert "MCP-Pandoc Test Document" in txt_output.read_text()
+    assert "MCP-Pandoc Test Document" in txt_output.read_text(encoding="utf-8")
