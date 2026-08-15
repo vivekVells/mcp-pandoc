@@ -546,7 +546,7 @@ async def call_tool(
 
 server = Server(
     "mcp-pandoc",
-    version="0.11.0",
+    version="0.11.1",
     on_list_tools=list_tools,
     on_call_tool=call_tool,
 )

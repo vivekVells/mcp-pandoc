@@ -128,8 +128,9 @@ class TestFilterSupport:
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_filter_file_creation_and_permissions(self):
-        """Test creating filter files with proper permissions"""
+    @pytest.mark.skipif(os.name == "nt", reason="Windows has no POSIX execute bit")
+    def test_filter_file_posix_execute_permissions(self):
+        """Test creating filter files with POSIX execute permissions."""
         filter_content = '''#!/usr/bin/env python3
 """
 Simple test Pandoc filter

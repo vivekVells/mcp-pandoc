@@ -1,5 +1,6 @@
 import pypandoc
 import os
+import shutil
 import pytest
 
 # Define paths
@@ -42,6 +43,10 @@ def test_bidirectional_conversions(from_format, to_format):
     if to_format == 'pdf' and from_format != 'md':
         pytest.skip("Skipping conversion to PDF from formats other than markdown for this test.")
 
+    # The server explicitly uses xelatex for PDF output, so test that exact path.
+    if to_format == 'pdf' and not shutil.which("xelatex"):
+        pytest.skip("Skipping PDF conversion: xelatex is not installed.")
+
     input_file = os.path.join(FIXTURE_DIR, f'test.{from_format}')
     output_file = os.path.join(OUTPUT_DIR, f'test.{to_format}')
 
@@ -56,8 +61,16 @@ def test_bidirectional_conversions(from_format, to_format):
     if to_format == 'txt':
         pandoctor_to_format = 'plain'
 
+    extra_args = ["--pdf-engine=xelatex"] if to_format == 'pdf' else []
+
     try:
-        pypandoc.convert_file(input_file, pandoctor_to_format, format=pandoctor_from_format, outputfile=output_file)
+        pypandoc.convert_file(
+            input_file,
+            pandoctor_to_format,
+            format=pandoctor_from_format,
+            outputfile=output_file,
+            extra_args=extra_args,
+        )
         assert os.path.exists(output_file)
     except Exception as e:
         pytest.fail(f"Conversion from {from_format} to {to_format} failed with error: {e}")

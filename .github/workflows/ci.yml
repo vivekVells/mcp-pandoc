@@ -8,7 +8,7 @@ name: Build & Test
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -21,9 +21,6 @@ jobs:
 
     - name: Install uv
       run: pip install uv
-
-    - name: Install Pandoc and TeX Live
-      run: sudo apt-get update && sudo apt-get install -y pandoc texlive-xetex
 
     - name: Sync dependencies (all groups)
       run: uv sync --all-groups
@@ -39,6 +36,49 @@ jobs:
     - name: Run pre-commit
       run: uv run pre-commit run --all-files
 
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up Pandoc
+      uses: r-lib/actions/setup-pandoc@d3c5be51b12e724e68f33216ca3c148b66d5f0b6  # v2
+      with:
+        pandoc-version: "3.1.3"
+
+    # TeX is only needed to render PDF; PDF tests skip cleanly without an engine,
+    # so we install it on Linux only rather than pay the cost on every runner.
+    - name: Install TeX Live (Linux only)
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y texlive-xetex
+
+    - name: Install uv
+      run: pip install uv
+
+    - name: Sync dependencies (all groups)
+      run: uv sync --all-groups
+
+    - name: Verify matrix Python
+      env:
+        EXPECTED_PYTHON: ${{ matrix.python-version }}
+      run: >-
+        uv run python -c
+        "import os, platform;
+        assert platform.python_version().startswith(os.environ['EXPECTED_PYTHON'] + '.')"
+
     - name: Run pytest
       run: uv run pytest
 
@@ -46,14 +86,17 @@ jobs:
       run: uv build
 
     - name: Test server imports
-      run: uv run python -c "import mcp_pandoc; print('✅ Server imports correctly')"
-      # run: |
-      #   # MCP servers are stdio-based and block waiting for JSON-RPC input
-      #   # A successful timeout means the server started and was running correctly
-      #   timeout 3 uv run mcp-pandoc >/dev/null 2>&1
-      #   if [ $? -eq 124 ]; then  # 124 is timeout's exit code when process is killed
-      #       echo "✅ MCP server starts and runs correctly"
-      #   else
-      #       echo "❌ MCP server failed to start or crashed"
-      #       exit 1
-      #   fi
+      run: uv run python -c "import mcp_pandoc; print('Server imports correctly')"
+
+  # Single stable check to require in branch protection: green only when lint and
+  # every matrix leg of test pass.
+  ci-ok:
+    name: CI OK
+    if: ${{ always() }}
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Require every upstream job to pass
+      run: >-
+        test "${{ needs.lint.result }}" = success &&
+        test "${{ needs.test.result }}" = success

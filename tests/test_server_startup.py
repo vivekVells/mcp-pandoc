@@ -36,7 +36,7 @@ async def test_stdio_server_initializes_and_lists_tool():
             )
 
     assert initialized.server_info.name == "mcp-pandoc"
-    assert initialized.server_info.version == "0.11.0"
+    assert initialized.server_info.version == "0.11.1"
     assert [tool.name for tool in tools.tools] == ["convert-contents"]
     assert called.is_error is False
     assert '<h1 id="hello">Hello</h1>' in called.content[0].text
@@ -82,4 +82,4 @@ async def test_modern_client_preserves_tool_contract(tmp_path):
     assert missing.is_error is True
     assert missing.content[0].text == "Missing arguments"
     assert txt.is_error is False
-    assert "MCP-Pandoc Test Document" in txt_output.read_text()
+    assert "MCP-Pandoc Test Document" in txt_output.read_text(encoding="utf-8")
