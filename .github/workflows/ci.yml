@@ -65,7 +65,7 @@ jobs:
       run: pip install uv
 
     - name: Sync dependencies (all groups)
-      run: uv sync --all-groups
+      run: uv sync --python "${{ matrix.python-version }}" --all-groups
 
     - name: Run pytest
       run: uv run pytest
