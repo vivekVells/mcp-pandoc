@@ -69,6 +69,14 @@ jobs:
     - name: Sync dependencies (all groups)
       run: uv sync --python "${{ matrix.python-version }}" --all-groups
 
+    - name: Verify matrix Python
+      env:
+        EXPECTED_PYTHON: ${{ matrix.python-version }}
+      run: >-
+        uv run python -c
+        "import os, platform;
+        assert platform.python_version().startswith(os.environ['EXPECTED_PYTHON'] + '.')"
+
     - name: Run pytest
       run: uv run pytest
 
