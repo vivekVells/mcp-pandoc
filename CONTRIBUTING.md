@@ -158,9 +158,12 @@ uv run pre-commit run --all-files
 
 ## Testing Requirements
 
+CI runs the full test suite on Ubuntu and Windows with Python 3.11 and 3.13.
+The `CI OK` check passes only when lint and every test-matrix job succeeds.
+
 1. **Run Tests**: Always run the full test suite before submitting changes
    ```bash
-   uv run pytest tests/test_conversions.py
+   uv run pytest
    ```
 
 2. **Add Tests**: New functionality must include corresponding tests
