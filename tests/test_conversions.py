@@ -3,19 +3,6 @@ import os
 import shutil
 import pytest
 
-# pandoc renders PDF through an external engine (a TeX distribution by default).
-# Without one installed, PDF conversion cannot run — so those cases are skipped
-# rather than failed. This keeps CI green on jobs that install pandoc but not a
-# heavy TeX distribution (e.g. the Windows matrix job).
-_PDF_ENGINES = (
-    "pdflatex", "xelatex", "lualatex", "tectonic", "wkhtmltopdf",
-    "weasyprint", "prince", "context", "pagedjs-cli", "typst",
-)
-
-
-def _pdf_engine_available() -> bool:
-    return any(shutil.which(engine) for engine in _PDF_ENGINES)
-
 # Define paths
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'output')
@@ -56,10 +43,9 @@ def test_bidirectional_conversions(from_format, to_format):
     if to_format == 'pdf' and from_format != 'md':
         pytest.skip("Skipping conversion to PDF from formats other than markdown for this test.")
 
-    # PDF output needs a rendering engine (TeX etc.). Skip cleanly when none is
-    # installed instead of failing — e.g. a Windows job with pandoc but no TeX.
-    if to_format == 'pdf' and not _pdf_engine_available():
-        pytest.skip("Skipping PDF conversion: no PDF engine (e.g. a TeX distribution) is installed.")
+    # The server explicitly uses xelatex for PDF output, so test that exact path.
+    if to_format == 'pdf' and not shutil.which("xelatex"):
+        pytest.skip("Skipping PDF conversion: xelatex is not installed.")
 
     input_file = os.path.join(FIXTURE_DIR, f'test.{from_format}')
     output_file = os.path.join(OUTPUT_DIR, f'test.{to_format}')
@@ -75,8 +61,16 @@ def test_bidirectional_conversions(from_format, to_format):
     if to_format == 'txt':
         pandoctor_to_format = 'plain'
 
+    extra_args = ["--pdf-engine=xelatex"] if to_format == 'pdf' else []
+
     try:
-        pypandoc.convert_file(input_file, pandoctor_to_format, format=pandoctor_from_format, outputfile=output_file)
+        pypandoc.convert_file(
+            input_file,
+            pandoctor_to_format,
+            format=pandoctor_from_format,
+            outputfile=output_file,
+            extra_args=extra_args,
+        )
         assert os.path.exists(output_file)
     except Exception as e:
         pytest.fail(f"Conversion from {from_format} to {to_format} failed with error: {e}")
