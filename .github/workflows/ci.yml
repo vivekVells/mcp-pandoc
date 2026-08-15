@@ -80,8 +80,11 @@ jobs:
   # every matrix leg of test pass.
   ci-ok:
     name: CI OK
+    if: ${{ always() }}
     needs: [lint, test]
     runs-on: ubuntu-latest
     steps:
-    - name: All checks passed
-      run: echo "lint and the full test matrix passed"
+    - name: Require every upstream job to pass
+      run: >-
+        test "${{ needs.lint.result }}" = success &&
+        test "${{ needs.test.result }}" = success
