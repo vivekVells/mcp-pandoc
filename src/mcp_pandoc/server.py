@@ -33,6 +33,40 @@ def _join_with_and(values) -> str:
     return f"{', '.join(values[:-1])} and {values[-1]}"
 
 
+def _validate_reference_doc(reference_doc: str, output_format: str, origin: str) -> None:
+    """Reject a reference document pandoc would silently mishandle, whichever source supplied it."""
+    if output_format not in REFERENCE_DOC_FORMATS:
+        raise ValueError(
+            f"reference_doc is not supported for '{output_format}' output format "
+            f"(from {origin}). Supported formats: {_join_with_and(REFERENCE_DOC_FORMATS)}"
+        )
+
+    # Only an absolute path can be checked from here. Pandoc resolves a relative one
+    # through the working directory and resource-path, so looking for it now would
+    # reject a reference pandoc is able to find.
+    if os.path.isabs(reference_doc):
+        if not os.path.exists(reference_doc):
+            raise ValueError(f"Reference document not found: {reference_doc} (from {origin})")
+        if not os.path.isfile(reference_doc):
+            raise ValueError(f"Reference document is not a file: {reference_doc} (from {origin})")
+
+    # Pandoc does not verify that the reference document matches the writer. A
+    # mismatch is silently ignored for docx output, and produces an unreadable
+    # file for odt output. Both exit 0 with no warning, so we reject it here.
+    # The name alone settles this, so it runs for relative paths too.
+    expected_extension = f".{output_format}"
+    actual_extension = os.path.splitext(reference_doc)[1].lower()
+    if actual_extension != expected_extension:
+        raise ValueError(
+            f"reference_doc must be a '{expected_extension}' file when output_format is "
+            f"'{output_format}', but '{os.path.basename(reference_doc)}' was given "
+            f"(from {origin}). Pandoc does not reject a mismatched reference document; "
+            f"it silently produces an unstyled or unreadable file. Create a matching "
+            f"template with: pandoc -o reference{expected_extension} "
+            f"--print-default-data-file reference{expected_extension}"
+        )
+
+
 async def handle_list_tools() -> list[types.Tool]:
     """List available tools.
 
@@ -161,7 +195,9 @@ async def handle_list_tools() -> list[types.Tool]:
                         "description": (
                             "Path to a reference document to use for styling. Supported for docx, odt "
                             "and pptx output. The file must match the output format: a .docx reference "
-                            "for docx output, .odt for odt, .pptx for pptx."
+                            "for docx output, .odt for odt, .pptx for pptx. Takes precedence over a "
+                            "reference-doc key in a defaults file, which is then ignored. An absolute "
+                            "path must already exist; a relative path is left to pandoc to resolve."
                         )
                     },
                     "filters": {
@@ -176,7 +212,10 @@ async def handle_list_tools() -> list[types.Tool]:
                         "type": "string",
                         "description": (
                             "Path to a Pandoc defaults file (YAML) containing conversion options. "
-                            "Similar to using pandoc -d option."
+                            "Similar to using pandoc -d option. A reference-doc key inside the file "
+                            "is validated by the same rule as the reference_doc parameter, but only "
+                            "when the output format accepts a reference document. The reference_doc "
+                            "parameter, when given, overrides it."
                         )
                     }
                 },
@@ -214,33 +253,6 @@ async def handle_call_tool(
     if not contents and not input_file:
         raise ValueError("Either 'contents' or 'input_file' must be provided")
 
-    # Validate reference_doc if provided
-    if reference_doc:
-        if output_format not in REFERENCE_DOC_FORMATS:
-            raise ValueError(
-                f"reference_doc is not supported for '{output_format}' output format. "
-                f"Supported formats: {_join_with_and(REFERENCE_DOC_FORMATS)}"
-            )
-        if not os.path.exists(reference_doc):
-            raise ValueError(f"Reference document not found: {reference_doc}")
-        if not os.path.isfile(reference_doc):
-            raise ValueError(f"Reference document is not a file: {reference_doc}")
-
-        # Pandoc does not verify that the reference document matches the writer. A
-        # mismatch is silently ignored for docx output, and produces an unreadable
-        # file for odt output. Both exit 0 with no warning, so we reject it here.
-        expected_extension = f".{output_format}"
-        actual_extension = os.path.splitext(reference_doc)[1].lower()
-        if actual_extension != expected_extension:
-            raise ValueError(
-                f"reference_doc must be a '{expected_extension}' file when output_format is "
-                f"'{output_format}', but '{os.path.basename(reference_doc)}' was given. Pandoc "
-                f"does not reject a mismatched reference document; it silently produces an "
-                f"unstyled or unreadable file. Create a matching template with: "
-                f"pandoc -o reference{expected_extension} "
-                f"--print-default-data-file reference{expected_extension}"
-            )
-
     # Validate defaults_file if provided
     if defaults_file:
         if not os.path.exists(defaults_file):
@@ -268,6 +280,24 @@ async def handle_call_tool(
             raise ValueError(f"Permission denied when reading defaults file: {defaults_file}") from e
         except Exception as e:
             raise ValueError(f"Error reading defaults file {defaults_file}: {str(e)}") from e
+
+    # reference-doc can also arrive inside a defaults file, which the guard below would
+    # not see if it only looked at the parameter. Validate whichever reference pandoc
+    # will actually use. This has to run after the defaults file is parsed.
+    defaults_reference_doc = yaml_content.get("reference-doc") if defaults_file else None
+
+    if reference_doc:
+        _validate_reference_doc(reference_doc, output_format, "reference_doc parameter")
+    elif defaults_reference_doc is not None and output_format in REFERENCE_DOC_FORMATS:
+        # A defaults file is reused across formats. Pandoc ignores reference-doc for
+        # writers that do not support it, so rejecting here would break a working call.
+        origin = f"reference-doc in {os.path.basename(defaults_file)}"
+        if not isinstance(defaults_reference_doc, str):
+            raise ValueError(
+                f"{origin} must be a string path, but a "
+                f"{type(defaults_reference_doc).__name__} was given"
+            )
+        _validate_reference_doc(defaults_reference_doc, output_format, origin)
 
     # Validate the output format against the single list the schema also advertises, so
     # the runtime check and the enum cannot drift apart.
@@ -357,10 +387,12 @@ async def handle_call_tool(
 
         return validated_filters
 
-    def format_result_info(filters=None, defaults_file=None, validated_filters=None):
-        """Format filter and defaults file information for result messages."""
+    def format_result_info(filters=None, defaults_file=None, validated_filters=None,
+                           reference_doc=None, defaults_reference_doc=None):
+        """Format filter, defaults file and reference document information for result messages."""
         filter_info = ""
         defaults_info = ""
+        reference_info = ""
 
         if filters and validated_filters:
             filter_names = [os.path.basename(f) for f in validated_filters]
@@ -370,7 +402,13 @@ async def handle_call_tool(
             defaults_basename = os.path.basename(defaults_file)
             defaults_info = f" using defaults file: {defaults_basename}"
 
-        return filter_info, defaults_info
+        if reference_doc and defaults_reference_doc:
+            reference_info = (
+                f" with reference document: {os.path.basename(reference_doc)} "
+                f"(reference-doc in the defaults file was ignored)"
+            )
+
+        return filter_info, defaults_info, reference_info
 
     try:
         # Prepare conversion arguments
@@ -426,9 +464,12 @@ async def handle_call_tool(
                     extra_args=extra_args
                 )
 
-                # Create result message with filter and defaults information
-                filter_info, defaults_info = format_result_info(filters, defaults_file, validated_filters)
-                result_message = f"File successfully converted{filter_info}{defaults_info} and saved to: {output_file}"
+                # Create result message with filter, defaults and reference document information
+                filter_info, defaults_info, reference_info = format_result_info(
+                    filters, defaults_file, validated_filters, reference_doc, defaults_reference_doc
+                )
+                result_message = (f"File successfully converted{filter_info}{defaults_info}{reference_info} "
+                                  f"and saved to: {output_file}")
             else:
                 # Convert file to string
                 converted_output = pypandoc.convert_file(
@@ -449,10 +490,13 @@ async def handle_call_tool(
                     extra_args=extra_args
                 )
 
-                # Create result message with filter and defaults information
-                filter_info, defaults_info = format_result_info(filters, defaults_file, validated_filters)
+                # Create result message with filter, defaults and reference document information
+                filter_info, defaults_info, reference_info = format_result_info(
+                    filters, defaults_file, validated_filters, reference_doc, defaults_reference_doc
+                )
                 result_message = (
-                    f"Content successfully converted{filter_info}{defaults_info} and saved to: {output_file}"
+                    f"Content successfully converted{filter_info}{defaults_info}{reference_info} "
+                    f"and saved to: {output_file}"
                 )
             else:
                 # Convert content to string
@@ -470,7 +514,9 @@ async def handle_call_tool(
                 raise ValueError("Conversion resulted in empty output")
 
             # Add filter and defaults information to the notification
-            filter_info, defaults_info = format_result_info(filters, defaults_file, validated_filters)
+            # reference_info cannot apply here: every format that accepts a reference
+            # document also requires output_file, so this branch is never reached with one.
+            filter_info, defaults_info, _ = format_result_info(filters, defaults_file, validated_filters)
             # Adjust format for inline display
             if filter_info:
                 filter_info = f" (with filters: {', '.join([os.path.basename(f) for f in validated_filters])})"
@@ -546,7 +592,7 @@ async def call_tool(
 
 server = Server(
     "mcp-pandoc",
-    version="0.11.1",
+    version="0.11.2",
     on_list_tools=list_tools,
     on_call_tool=call_tool,
 )
