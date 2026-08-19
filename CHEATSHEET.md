@@ -79,7 +79,7 @@ Pandoc has never shipped a PDF reader. Pandoc gained a PowerPoint reader in 3.8.
 
 ### Reference Document Styling
 
-The reference document must be the same format as the output: `.docx` for DOCX, `.odt` for ODT, `.pptx` for PPTX. Mixing them is rejected.
+The reference document must be the same format as the output: `.docx` for DOCX, `.odt` for ODT, `.pptx` for PPTX. Mixing them is rejected. The same check applies whether the reference comes from the `reference_doc` parameter or from a `reference-doc` key in a defaults file.
 
 ```bash
 # Step 1: Create a reference document in the format you will output
@@ -209,6 +209,9 @@ bibliography: references.bib"
 | **Corporate branding**  | Customize the reference in Word/LibreOffice → Save            |
 | **Apply styling**       | Add `reference_doc: "/path/to/ref.docx"` parameter            |
 | **Match the format**    | `.docx` for DOCX, `.odt` for ODT, `.pptx` for PPTX. Mixing them is rejected |
+| **Set in a defaults file** | `reference-doc: /path/to/ref.docx` in the YAML, checked by the same rule |
+| **If both are given**   | The `reference_doc` parameter wins; the defaults-file value is ignored |
+| **Path resolution**     | An absolute path must already exist; a relative one is left to pandoc |
 
 ### Defaults Files
 
@@ -233,9 +236,11 @@ bibliography: references.bib"
 | "xelatex not found"                     | Install TeX Live                            |
 | "Reference document not found"          | Check file path exists                      |
 | "output_file path is required"          | Add complete file path for advanced formats |
-| "reference_doc is not supported for..." | Reference docs work with DOCX and ODT       |
+| "reference_doc is not supported for..." | Reference docs work with DOCX, ODT and PPTX |
 | "reference_doc must be a '.odt' file..." | Reference must match the output format      |
 | "Reference document is not a file"      | Path points at a directory, not a file      |
+| "... (from reference-doc in x.yaml)"   | The reference came from the defaults file, not the parameter |
+| "... must be a string path, but a list was given" | The `reference-doc` value in the defaults file is not a path string |
 | "Defaults file not found"              | Verify YAML file path and accessibility     |
 | "Filter not executable"                | Check filter permissions: `chmod +x filter.py` |
 | "Invalid YAML in defaults file"        | Validate YAML syntax and structure          |
@@ -250,7 +255,7 @@ bibliography: references.bib"
 | `output_file`   | string | ⚠️\*\*   | Save location                 | `"/path/output.docx"`       |
 | `input_format`  | string | ❌       | Source format (auto-detected) | `"markdown"`                |
 | `reference_doc` | string | ❌       | DOCX, ODT or PPTX template, matching the output format | `"/path/template.docx"` |
-| `defaults_file` | string | ❌       | Pandoc defaults YAML config   | `"/path/defaults.yaml"`     |
+| `defaults_file` | string | ❌       | Pandoc defaults YAML config, may carry `reference-doc` | `"/path/defaults.yaml"` |
 | `filters`       | array  | ❌       | Pandoc filters list           | `["/path/filter.py"]`       |
 
 \*Either `contents` OR `input_file` required

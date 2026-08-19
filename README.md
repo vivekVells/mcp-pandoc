@@ -66,8 +66,8 @@ More to come...
      - `input_format` (string): Source format of the content (defaults to markdown)
      - `output_format` (string): Target format (defaults to markdown)
      - `output_file` (string): Complete path for output file (required for pdf, docx, rst, latex, epub, odt, pptx formats)
-     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx, odt and pptx output; the file must match the output format)
-     - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options
+     - `reference_doc` (string): Path to a reference document to use for styling (supported for docx, odt and pptx output; the file must match the output format). Takes precedence over a `reference-doc` key in a defaults file
+     - `defaults_file` (string): Path to a Pandoc defaults file (YAML) containing conversion options. A `reference-doc` key inside it is validated by the same rule as `reference_doc`
      - `filters` (array): List of Pandoc filter paths to apply during conversion
    - Supported formats, by direction:
 
@@ -105,6 +105,8 @@ metadata:
 ```
 
 Example usage: `"Convert paper.md to PDF using defaults academic-paper.yaml and save as paper.pdf"`
+
+A defaults file may also carry `reference-doc:`. It is validated by the same rule as the `reference_doc` parameter, but only when the output format accepts a reference document (docx, odt, pptx). For other formats pandoc ignores the key, so mcp-pandoc does too.
 
 #### Pandoc Filters
 
@@ -304,6 +306,9 @@ To use the published one
    - Error: "reference_doc must be a '.odt' file when output_format is 'odt'"
    - Solution: The reference document must be the same format as the output. Pandoc does not check this itself: a mismatched reference is silently ignored for DOCX output, and produces an ODT file that cannot be opened
    - Note: Reference documents work with DOCX, ODT and PPTX output formats
+   - Note: The same rule applies to a `reference-doc` key inside a defaults file. Every reference error names the source it came from, either `reference_doc parameter` or `reference-doc in <file>.yaml`
+   - Note: If both are supplied, the `reference_doc` parameter is used, the defaults-file value is ignored, and the success message says so
+   - Note: An absolute reference path must already exist. A relative one is left to pandoc, which resolves it against the working directory and `resource-path`
    - How to create: `pandoc -o reference.docx --print-default-data-file reference.docx`, and likewise with `reference.odt` or `reference.pptx`
 
 ## Quickstart

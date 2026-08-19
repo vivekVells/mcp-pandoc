@@ -213,14 +213,15 @@ The tool description and JSON schema are read by a language model before it deci
 
 Feature commits carry their own version bump. New backwards-compatible feature = MINOR, bug fix = PATCH.
 
-Two files declare it and one test compares them, so they must move together:
+Three places carry the version. Two declare it, one asserts it, and they must move together:
 
 | File | What to change |
 |---|---|
 | `pyproject.toml` | `version = "..."` |
 | `src/mcp_pandoc/server.py` | `Server("mcp-pandoc", version="...")` |
+| `tests/test_server_startup.py` | the version literal in the handshake assertion |
 
-Then run `uv sync` so `uv.lock` matches. `tests/test_advanced_features.py` asserts the two agree and will fail if you update only one.
+Then run `uv sync` so `uv.lock` matches. `tests/test_advanced_features.py` asserts `pyproject.toml` and `server.py` agree, and the startup test asserts the version a client sees. Updating only one will fail.
 
 ## Reporting your environment
 

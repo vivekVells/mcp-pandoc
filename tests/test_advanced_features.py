@@ -624,6 +624,128 @@ class TestReferenceDocSupport:
 
         assert "Reference document not found" in str(excinfo.value)
 
+    @pytest.mark.asyncio
+    async def test_defaults_file_reference_doc_is_rejected_when_it_does_not_match(self):
+        """A mismatched reference-doc inside a defaults file must be rejected as well.
+
+        The guard only ever saw the reference_doc parameter, so a wrong template named in
+        the YAML reached pandoc, which exits 0 and writes a file that cannot be opened.
+        The error has to name the defaults file or the user inspects the wrong input.
+        """
+        from mcp_pandoc.server import handle_call_tool
+
+        reference = self._make_reference("docx")
+        defaults_path = self._path("defaults.yaml")
+        with open(defaults_path, "w") as handle:
+            yaml.dump({"reference-doc": reference}, handle)
+        output = self._path("out.odt")
+
+        with pytest.raises(ValueError) as excinfo:
+            await handle_call_tool(
+                "convert-contents",
+                {
+                    "contents": "# Test",
+                    "output_format": "odt",
+                    "output_file": output,
+                    "defaults_file": defaults_path,
+                },
+            )
+
+        message = str(excinfo.value)
+        assert "must be a '.odt' file" in message
+        assert "reference-doc in" in message
+        assert not os.path.exists(output), "no output should be written when validation fails"
+
+    @pytest.mark.asyncio
+    async def test_reference_doc_parameter_overrides_the_defaults_file(self):
+        """The parameter wins over the defaults file, and the result message says so.
+
+        Pandoc writes an odt either way, so asserting the output exists would prove nothing.
+        The tagged stylesheet shows which reference reached the document; the message
+        assertion catches the silent failure of not handing both sources to the formatter.
+        """
+        from mcp_pandoc.server import handle_call_tool
+
+        sentinel_reference = self._make_sentinel_odt_reference()
+        plain_reference = self._make_reference("odt")
+        defaults_path = self._path("defaults.yaml")
+        with open(defaults_path, "w") as handle:
+            yaml.dump({"reference-doc": sentinel_reference}, handle)
+        output = self._path("out.odt")
+
+        result = await handle_call_tool(
+            "convert-contents",
+            {
+                "contents": "# Content",
+                "output_format": "odt",
+                "output_file": output,
+                "reference_doc": plain_reference,
+                "defaults_file": defaults_path,
+            },
+        )
+
+        assert self.SENTINEL_FONT.encode() not in self._styles_xml(output)
+        assert "(reference-doc in the defaults file was ignored)" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_relative_reference_doc_found_through_resource_path_is_accepted(self):
+        """A relative reference pandoc can resolve must reach pandoc, not be rejected first.
+
+        Pandoc looks a relative reference-doc up through resource-path, and resolves both
+        against the working directory rather than the defaults file. Checking existence here
+        would reject this working setup, so the guard only checks paths it can resolve itself.
+        """
+        from mcp_pandoc.server import handle_call_tool
+
+        templates = self._path("templates")
+        os.makedirs(templates)
+        os.rename(self._make_reference("odt"), os.path.join(templates, "ref.odt"))
+
+        defaults_path = self._path("defaults.yaml")
+        with open(defaults_path, "w") as handle:
+            yaml.dump({"reference-doc": "ref.odt", "resource-path": ["templates"]}, handle)
+        output = self._path("out.odt")
+
+        current_dir = os.getcwd()
+        try:
+            os.chdir(self.temp_dir)
+            await handle_call_tool(
+                "convert-contents",
+                {
+                    "contents": "# Content",
+                    "output_format": "odt",
+                    "output_file": output,
+                    "defaults_file": defaults_path,
+                },
+            )
+        finally:
+            os.chdir(current_dir)
+
+        assert os.path.exists(output)
+        assert os.path.getsize(output) > 0
+
+    @pytest.mark.asyncio
+    async def test_defaults_file_reference_doc_is_ignored_for_an_unsupported_format(self):
+        """A general-purpose defaults file must still work for formats without styling.
+
+        Pandoc exits 0 and drops reference-doc for writers that do not accept one, so a
+        user who reuses one defaults file across formats would be blocked by a rejection
+        that pandoc itself would never raise.
+        """
+        from mcp_pandoc.server import handle_call_tool
+
+        reference = self._make_reference("docx")
+        defaults_path = self._path("defaults.yaml")
+        with open(defaults_path, "w") as handle:
+            yaml.dump({"reference-doc": reference}, handle)
+
+        result = await handle_call_tool(
+            "convert-contents",
+            {"contents": "# Content", "output_format": "html", "defaults_file": defaults_path},
+        )
+
+        assert "<h1" in result[0].text
+
 
 class TestFormatDirectionality:
     """Pandoc reads and writes different sets of formats, and the schema must say so.
@@ -641,6 +763,15 @@ class TestFormatDirectionality:
     def test_reference_doc_formats_are_all_writable(self):
         """A styling target that cannot be written would be unreachable."""
         assert set(REFERENCE_DOC_FORMATS) <= set(OUTPUT_FORMATS)
+
+    def test_reference_doc_formats_all_require_an_output_file(self):
+        """A reference document only reaches pandoc on the output_file path.
+
+        The inline branch drops the reference part of the success message, and the
+        comment there says that branch can never be reached with a reference. That
+        holds only while every reference-capable format also demands an output_file.
+        Adding one that returns inline would make the comment quietly false."""
+        assert set(REFERENCE_DOC_FORMATS) <= set(ADVANCED_FORMATS)
 
     def test_advanced_formats_are_all_writable(self):
         """An output_file requirement for a format we cannot write would be dead code."""
