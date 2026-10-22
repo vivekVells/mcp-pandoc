@@ -10,8 +10,9 @@
 <!--
 [![Downloads](https://img.shields.io/pypi/dm/mcp-pandoc.svg)](https://pypi.python.org/pypi/mcp-pandoc)
 [![CI](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml/badge.svg)](https://github.com/vivekVells/mcp-pandoc/actions/workflows/ci.yml)
-<a href="https://smithery.ai/server/mcp-pandoc"><img alt="Smithery Badge" src="https://smithery.ai/badge/mcp-pandoc"></a> <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a>
+<a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" /></a>
 -->
+<a href="https://lightnow.ai/servers/io.github.vivekVells/mcp-pandoc"><img alt="LightNow capabilities" src="https://lightnow.ai/badge/io.github.vivekVells/mcp-pandoc"></a>
 [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/vivekvells-mcp-pandoc-badge.png)](https://mseep.ai/app/vivekvells-mcp-pandoc)
 <a href="https://glama.ai/mcp/servers/xyzzgaj9bk"><img width="380" height="200" src="https://glama.ai/mcp/servers/xyzzgaj9bk/badge" />
 
